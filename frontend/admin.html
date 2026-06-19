@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Админ-панель | Архангел Михаил, Канны</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/site-config.js"></script>
+    <script defer src="assets/admin.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><span class="brand-mark"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Saint_Michael_%28Yaroslavl%2C_13th_c.%2C_GTG%29.jpg/250px-Saint_Michael_%28Yaroslavl%2C_13th_c.%2C_GTG%29.jpg" alt="Икона Архангела Михаила"></span><span><strong>Архангел Михаил</strong><small>Православный приход в Каннах</small></span></a>
+      <nav class="main-nav"><a href="schedule.html">Богослужения</a><a href="sacraments.html">Таинства</a><a href="history.html">История</a><a href="visit.html">Посетителям</a><a href="help.html">Помощь</a><a href="contacts.html">Контакты</a></nav>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <p class="section-label">Администрирование</p>
+        <h1>Панель управления сайтом</h1>
+        <p>Подключение к Supabase, вход администратора, редактирование расписания, новостей и текстов страниц.</p>
+      </section>
+
+      <section class="section admin-shell">
+        <aside class="admin-panel">
+          <h2>Подключение</h2>
+          <form class="admin-form" id="connection-form">
+            <label>Supabase URL<input id="supabase-url" type="url" placeholder="https://xxxx.supabase.co"></label>
+            <label>Anon public key<input id="supabase-key" type="password" placeholder="eyJ..."></label>
+            <div class="admin-actions"><button class="primary" type="submit">Подключить</button></div>
+          </form>
+          <p class="admin-status" id="connection-status">Введите параметры Supabase или задайте window.ST_MICHAEL_SUPABASE_URL / window.ST_MICHAEL_SUPABASE_ANON_KEY.</p>
+
+          <h2>Вход</h2>
+          <form class="admin-form" id="login-form">
+            <label>Email<input id="admin-email" type="email" autocomplete="email"></label>
+            <label>Пароль<input id="admin-password" type="password" autocomplete="current-password"></label>
+            <div class="admin-actions"><button class="primary" type="submit">Войти</button><button type="button" id="logout-button">Выйти</button></div>
+          </form>
+          <p class="admin-status" id="auth-status">Ожидание входа.</p>
+        </aside>
+
+        <section class="admin-panel">
+          <h2>Редактор</h2>
+          <div class="admin-tabs" role="tablist">
+            <button class="active" type="button" data-tab="services">Расписание</button>
+            <button type="button" data-tab="news">Новости</button>
+            <button type="button" data-tab="pages">Страницы</button>
+          </div>
+
+          <form class="admin-form" id="editor-form">
+            <input id="record-id" type="hidden">
+            <label>Раздел<select id="record-type"><option value="services">Расписание</option><option value="news">Новости</option><option value="pages">Страницы</option></select></label>
+            <label>Дата / ключ<input id="record-date" type="text" placeholder="2026-06-21 или history"></label>
+            <label>Заголовок<input id="record-title" type="text" placeholder="Божественная литургия"></label>
+            <label>Описание<textarea id="record-body" placeholder="Текст записи"></textarea></label>
+            <label>Сортировка<input id="record-sort" type="number" value="0"></label>
+            <div class="admin-actions">
+              <button class="primary" type="submit">Сохранить</button>
+              <button type="button" id="new-record-button">Новая запись</button>
+              <button type="button" id="delete-record-button">Удалить</button>
+            </div>
+          </form>
+
+          <div class="admin-list" id="records-list"></div>
+          <p class="admin-status" id="editor-status">После подключения появятся записи выбранного раздела.</p>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer"><p>© Приход Архангела Михаила в Каннах</p><p><a href="index.html">На сайт</a></p></footer>
+  </body>
+</html>
