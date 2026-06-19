@@ -57,20 +57,29 @@ a {
 
 .brand {
   display: inline-flex;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
   text-decoration: none;
 }
 
 .brand-mark {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border: 1px solid var(--gold);
+  display: block;
+  width: 58px;
+  height: 58px;
+  padding: 3px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 2px solid var(--gold);
   border-radius: 50%;
-  color: var(--gold-dark);
-  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(29, 39, 48, 0.18);
+}
+
+.brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .brand strong,
@@ -78,20 +87,31 @@ a {
   display: block;
 }
 
+.brand strong {
+  color: var(--gold-dark);
+  font-family: "Oglavie", Georgia, "Times New Roman", serif;
+  font-size: clamp(24px, 2.6vw, 34px);
+  font-weight: 400;
+  line-height: 0.95;
+}
+
 .brand small {
   color: var(--muted);
-  font-size: 12px;
-  font-family: Arial, sans-serif;
+  margin-top: 4px;
+  font-family: "Oglavie", Georgia, "Times New Roman", serif;
+  font-size: clamp(14px, 1.5vw, 19px);
+  line-height: 1;
 }
 
 .main-nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px 18px;
+  gap: 8px 20px;
   color: #354550;
-  font-family: Arial, sans-serif;
-  font-size: 14px;
+  font-family: "Oglavie", Georgia, "Times New Roman", serif;
+  font-size: clamp(20px, 1.9vw, 28px);
+  line-height: 1;
 }
 
 .main-nav a,
@@ -106,7 +126,6 @@ a {
 
 .main-nav a.active {
   color: var(--gold-dark);
-  font-weight: 700;
 }
 
 .lang-switch {
@@ -566,11 +585,12 @@ h3 {
   }
 
   .brand strong {
-    font-size: 15px;
+    font-size: 22px;
   }
 
   .brand small {
-    max-width: 170px;
+    max-width: 190px;
+    font-size: 13px;
   }
 
   .hero {
