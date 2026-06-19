@@ -26,11 +26,12 @@
 
 Для Supabase:
 
-1. Выполнить SQL из `supabase/schema.sql` в Supabase SQL Editor.
-2. Создать пользователя в Supabase Auth.
-3. Открыть `/admin.html`.
-4. Ввести Supabase URL и anon public key или прописать их в `frontend/assets/site-config.js`.
-5. Войти email/паролем пользователя Supabase Auth.
+1. Настроить GitHub Secrets по инструкции `docs/supabase-github.md`.
+2. Запустить GitHub Actions workflow `Supabase migrations`.
+3. Создать пользователя в Supabase Auth.
+4. Открыть `/admin.html`.
+5. Ввести Supabase URL и anon public key или прописать их в `frontend/assets/site-config.js`.
+6. Войти email/паролем пользователя Supabase Auth.
 
 Панель умеет читать, создавать, редактировать и удалять записи в таблицах `services`, `news`, `pages`.
 
