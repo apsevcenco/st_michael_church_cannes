@@ -4,147 +4,37 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Храм Архангела Михаила в Каннах</title>
-    <meta name="description" content="Православный приход Архангела Михаила в Каннах: богослужения, таинства, история, помощь храму и контакты.">
+    <meta name="description" content="Православный приход Архангела Михаила в Каннах.">
     <link rel="stylesheet" href="assets/styles.css">
     <script defer src="assets/app.js"></script>
   </head>
   <body>
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="На главную">
-        <span class="brand-mark"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Saint_Michael_%28Yaroslavl%2C_13th_c.%2C_GTG%29.jpg/250px-Saint_Michael_%28Yaroslavl%2C_13th_c.%2C_GTG%29.jpg" alt="Икона Архангела Михаила"></span>
+        <span class="brand-mark"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Saint_Michael_%28Yaroslavl%2C_13th_c.%2C_GTG%29.jpg/250px-Saint_Michael_%28Yaroslavl%2C_13th_c.%2C_GTG%29.jpg" alt="Архангел Михаил"></span>
         <span><strong>Архангел Михаил</strong><small>Православный приход в Каннах</small></span>
       </a>
-      <nav class="main-nav" aria-label="Главная навигация">
-        <a href="schedule.html">Богослужения</a>
-        <a href="sacraments.html">Таинства</a>
-        <a href="history.html">История</a>
-        <a href="visit.html">Посетителям</a>
-        <a href="help.html">Помощь</a>
-        <a href="contacts.html">Контакты</a>
-      </nav>
-      <div class="lang-switch" aria-label="Языки">
-        <a class="active" href="index.html">RU</a><a href="fr.html">FR</a><a href="en.html">EN</a>
-      </div>
+      <nav class="main-nav" aria-label="Navigation"><a href="schedule.html">Богослужения</a><a href="sacraments.html">Таинства</a><a href="history.html">История</a><a href="visit.html">Посетителям</a><a href="help.html">Помощь</a><a href="contacts.html">Контакты</a></nav>
+      <div class="lang-switch church-lang-switch" aria-label="Languages"><a class="active" href="index.html"><span>RU</span></a><a href="fr.html"><span>FR</span></a><a href="en.html"><span>EN</span></a></div>
     </header>
-
-    <main>
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-media" role="img" aria-label="Храм Архангела Михаила в Каннах"></div>
+    <main><section class="hero" aria-labelledby="hero-title">
+        <div class="hero-media" role="img" aria-label="Храм Архистратига Божия Михаила"></div>
         <div class="hero-overlay">
           <p class="kicker">Канны, бульвар Александра III</p>
           <h1 id="hero-title">Храм Архистратига Божия Михаила</h1>
           <p class="hero-copy">Исторический православный приход Русской традиции на Лазурном Берегу: молитва, наследие, община и гостеприимство.</p>
-          <div class="hero-actions">
-            <a class="button primary" href="schedule.html">Расписание служб</a>
-            <a class="button ghost" href="visit.html">Как посетить</a>
-          </div>
+          <div class="hero-actions"><a class="button primary" href="schedule.html">Расписание служб</a><a class="button ghost" href="visit.html">Как посетить</a></div>
         </div>
       </section>
-
-      <section class="quick-panel" aria-label="Краткая информация">
-        <article><span>Ближайшая служба</span><strong>Воскресенье, 10:00</strong><a href="schedule.html">Смотреть календарь</a></article>
-        <article><span>Адрес</span><strong>40 boulevard Alexandre III, Cannes</strong><a href="contacts.html">Маршрут и карта</a></article>
-        <article><span>Связь</span><strong>Приходская канцелярия</strong><a href="contacts.html">Написать письмо</a></article>
+      <section class="quick-panel" aria-label="Quick information">
+        <article><span>Ближайшая служба</span><strong>Суббота, 10:00</strong><a href="schedule.html">Расписание служб</a></article>
+        <article><span>Адрес</span><strong>40 boulevard Alexandre III, Cannes</strong><a href="contacts.html">Контакты</a></article>
+        <article><span>Связь</span><strong>Приходская канцелярия</strong><a href="contacts.html">Контакты</a></article>
       </section>
-
-      <section class="api-status" aria-live="polite">
-        <span>Backend API</span><strong id="api-status-text">Проверка соединения...</strong>
-      </section>
-
-      <section class="section intro-grid">
-        <div>
-          <p class="section-label">Приход сегодня</p>
-          <h2>Живой сайт для прихожан, паломников и гостей Канн</h2>
-        </div>
-        <p>Главная страница ведёт к практическим разделам: расписанию, таинствам, истории, посещению, помощи храму и контактам. Основные переходы открывают отдельные страницы, готовые к наполнению официальными приходскими данными.</p>
-      </section>
-
-      <section class="section two-columns">
-        <div class="section-heading">
-          <p class="section-label">Богослужения</p>
-          <h2>Расписание на неделю</h2>
-          <p>Краткий блок для главной страницы. Полный календарь открыт на отдельной странице.</p>
-          <a class="text-link" href="schedule.html">Открыть полное расписание</a>
-        </div>
-        <div class="schedule-list">
-          <article class="service-card featured"><time datetime="2026-06-21">Вс, 21 июня</time><h3>Божественная литургия</h3><p>Часы в 9:30, Литургия в 10:00. Исповедь перед службой.</p></article>
-          <article class="service-card"><time datetime="2026-06-20">Сб, 20 июня</time><h3>Всенощное бдение</h3><p>Начало в 17:00. После службы можно подать записки.</p></article>
-          <article class="service-card"><time datetime="2026-06-24">Ср, 24 июня</time><h3>Молебен Архангелу Михаилу</h3><p>Начало в 10:00. Просьбы о молитве принимаются в храме.</p></article>
-        </div>
-      </section>
-
-      <section class="section feature-band">
-        <div>
-          <p class="section-label">Прихожанам</p>
-          <h2>Таинства и церковная жизнь</h2>
-          <p>Каждый раздел ведёт на отдельную страницу с подготовкой, контактами и понятным порядком обращения в приход.</p>
-        </div>
-        <div class="link-grid">
-          <a href="baptism.html">Крещение</a><a href="wedding.html">Венчание</a><a href="confession.html">Исповедь</a><a href="communion.html">Причастие</a><a href="notes.html">Записки</a><a href="meeting.html">Беседа</a>
-        </div>
-      </section>
-
-      <section class="section history">
-        <div class="section-heading">
-          <p class="section-label">Наследие</p>
-          <h2>Русская православная память Канн</h2>
-          <p>История храма вынесена в отдельный раздел с хронологией, святынями и материалами для будущего архива.</p>
-          <a class="text-link" href="history.html">Читать историю храма</a>
-        </div>
-        <div class="timeline">
-          <article><span>1894</span><p>Начало строительства русского православного храма в Каннах.</p></article>
-          <article><span>1896</span><p>Освящение храма и завершение колокольни.</p></article>
-          <article><span>XX век</span><p>Жизнь русской эмиграции, приходская школа, община и духовенство.</p></article>
-          <article><span>Сегодня</span><p>Регулярные богослужения, реставрационные задачи и открытость гостям.</p></article>
-        </div>
-      </section>
-
-      <section class="section visit">
-        <div>
-          <p class="section-label">Посетителям</p>
-          <h2>Как прийти в храм</h2>
-          <p>Для гостей Канн важны адрес, часы посещения, правила поведения и карта. Всё это собрано на странице посетителей и в контактах.</p>
-          <a class="text-link" href="visit.html">Информация для посетителей</a>
-        </div>
-        <div class="visitor-rules">
-          <article><h3>Часы посещения</h3><p>Время открытия, службы и экскурсии.</p></article>
-          <article><h3>В храме</h3><p>Фотосъёмка, свечи, одежда и тишина.</p></article>
-          <article><h3>Маршрут</h3><p>Пешком, транспортом и на автомобиле.</p></article>
-        </div>
-      </section>
-
-      <section class="section help">
-        <div>
-          <p class="section-label">Помощь храму</p>
-          <h2>Сохранить храм для молитвы и будущих поколений</h2>
-          <p>Раздел помощи показывает направления пожертвований, реставрационные нужды и способы связаться с приходом.</p>
-        </div>
-        <a class="button primary" href="help.html#donate">Пожертвовать</a>
-      </section>
-
-      <section class="section news">
-        <div class="section-heading"><p class="section-label">Новости</p><h2>Жизнь прихода</h2><a class="text-link" href="news.html">Все новости</a></div>
-        <div class="news-grid">
-          <article><time datetime="2026-06-19">19 июня 2026</time><h3><a href="news.html#schedule-update">Обновление расписания</a></h3><p>Краткая новость с переходом в календарь.</p></article>
-          <article><time datetime="2026-06-12">12 июня 2026</time><h3><a href="news.html#parish-meeting">Приходская встреча</a></h3><p>Анонсы для прихожан и гостей.</p></article>
-          <article><time datetime="2026-06-01">1 июня 2026</time><h3><a href="news.html#history-materials">История храма</a></h3><p>Материалы для будущего архива.</p></article>
-        </div>
-      </section>
-
-      <section class="section contacts">
-        <div>
-          <p class="section-label">Контакты</p>
-          <h2>Приход Архангела Михаила</h2>
-          <address>40 boulevard Alexandre III<br>06400 Cannes, France</address>
-          <p><a href="contacts.html">Открыть контакты, карту и форму обращения</a></p>
-        </div>
-        <iframe class="map-frame" title="Карта храма Архангела Михаила в Каннах" src="https://www.openstreetmap.org/export/embed.html?bbox=7.0376%2C43.5471%2C7.0436%2C43.5511&amp;layer=mapnik&amp;marker=43.5491%2C7.0406"></iframe>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <p>© Приход Архистратига Михаила в Каннах</p>
-      <p>Официальные контакты, реквизиты и расписание требуют подтверждения приходом.</p>
-    </footer>
+      <section class="api-status" aria-live="polite"><span>Backend API</span><strong id="api-status-text">Ready</strong></section>
+      <section class="section intro-grid"><div><p class="section-label">Приход сегодня</p><h2>Живой сайт для прихожан, паломников и гостей Канн</h2></div><p>Главная страница ведёт к практическим разделам: расписанию, таинствам, истории, посещению, помощи храму и контактам. Основные переходы открывают отдельные страницы, готовые к наполнению официальными приходскими данными.</p></section>
+      <section class="section feature-band"><div><p class="section-label">Таинства</p><h2>Таинства</h2><p>Каждый раздел ведёт на отдельную страницу с подготовкой и контактами.</p></div><div class="link-grid"><a href="baptism.html">Крещение</a><a href="wedding.html">Венчание</a><a href="confession.html">Исповедь</a><a href="communion.html">Причастие</a><a href="notes.html">Записки</a><a href="meeting.html">Беседа</a></div></section>
+      <section class="section news"><div class="section-heading"><p class="section-label">История</p><h2>Жизнь прихода</h2><a class="text-link" href="news.html">История</a></div></section></main>
+    <footer class="site-footer"><p>© Приход Архангела Михаила в Каннах</p><p><a href="index.html">На главную</a></p></footer>
   </body>
 </html>
