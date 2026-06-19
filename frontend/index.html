@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Приход Архангела Михаила в Каннах</title>
+    <meta
+      name="description"
+      content="Прототип сайта православного прихода Архистратига Михаила в Каннах: богослужения, история, посетителям, помощь храму и контакты."
+    >
+    <link rel="stylesheet" href="assets/styles.css">
+    <script defer src="assets/app.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="На главную">
+        <span class="brand-mark">М</span>
+        <span>
+          <strong>Архангел Михаил</strong>
+          <small>Православный приход в Каннах</small>
+        </span>
+      </a>
+      <nav class="main-nav" aria-label="Главная навигация">
+        <a href="#schedule">Богослужения</a>
+        <a href="#sacraments">Таинства</a>
+        <a href="#history">История</a>
+        <a href="#visit">Посетителям</a>
+        <a href="#help">Помощь</a>
+        <a href="#contacts">Контакты</a>
+      </nav>
+      <div class="lang-switch" aria-label="Языки">
+        <a class="active" href="#">RU</a>
+        <a href="#">FR</a>
+        <a href="#">EN</a>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-media" role="img" aria-label="Храм Архангела Михаила в Каннах"></div>
+        <div class="hero-overlay">
+          <p class="kicker">Канны, бульвар Александра III</p>
+          <h1 id="hero-title">Храм Архистратига Божия Михаила</h1>
+          <p class="hero-copy">
+            Исторический православный приход Русской традиции на Лазурном Берегу:
+            молитва, наследие, община и гостеприимство.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#schedule">Расписание служб</a>
+            <a class="button ghost" href="#visit">Как посетить</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="quick-panel" aria-label="Краткая информация">
+        <article>
+          <span>Ближайшая служба</span>
+          <strong>Воскресенье, 10:00</strong>
+          <a href="#schedule">Смотреть календарь</a>
+        </article>
+        <article>
+          <span>Адрес</span>
+          <strong>40 boulevard Alexandre III, Cannes</strong>
+          <a href="#contacts">Маршрут и парковка</a>
+        </article>
+        <article>
+          <span>Связь</span>
+          <strong>Приходская канцелярия</strong>
+          <a href="#contacts">Написать письмо</a>
+        </article>
+      </section>
+
+      <section class="api-status" aria-live="polite">
+        <span>Backend API</span>
+        <strong id="api-status-text">Проверка соединения...</strong>
+      </section>
+
+      <section class="section intro-grid">
+        <div>
+          <p class="section-label">Приход сегодня</p>
+          <h2>Сайт, который помогает прийти в храм, а не теряться в архиве</h2>
+        </div>
+        <p>
+          Главная страница устроена вокруг реальных приходских задач: узнать
+          расписание, подготовиться к исповеди и причастию, найти храм, передать
+          записки, поддержать реставрацию, прочитать историю и связаться с
+          духовенством. Исторические материалы вынесены в отдельный спокойный
+          слой, чтобы они усиливали доверие, но не закрывали главное.
+        </p>
+      </section>
+
+      <section class="section two-columns" id="schedule">
+        <div class="section-heading">
+          <p class="section-label">Богослужения</p>
+          <h2>Расписание на неделю</h2>
+          <p>Блок рассчитан на быструю еженедельную правку без изменения дизайна.</p>
+        </div>
+        <div class="schedule-list">
+          <article class="service-card featured">
+            <time datetime="2026-06-21">Вс, 21 июня</time>
+            <h3>Божественная литургия</h3>
+            <p>Часы в 9:30, Литургия в 10:00. Исповедь перед службой.</p>
+          </article>
+          <article class="service-card">
+            <time datetime="2026-06-20">Сб, 20 июня</time>
+            <h3>Всенощное бдение</h3>
+            <p>Начало в 17:00. После службы можно подать записки.</p>
+          </article>
+          <article class="service-card">
+            <time datetime="2026-06-24">Ср, 24 июня</time>
+            <h3>Молебен Архангелу Михаилу</h3>
+            <p>Начало в 10:00. Просьбы о молитве принимаются в храме.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section feature-band" id="sacraments">
+        <div>
+          <p class="section-label">Прихожанам</p>
+          <h2>Таинства и церковная жизнь</h2>
+          <p>
+            Отдельные страницы должны объяснять подготовку без канцелярита:
+            крещение, венчание, исповедь, причастие, отпевание, освящение дома,
+            беседа со священником.
+          </p>
+        </div>
+        <div class="link-grid">
+          <a href="#">Крещение</a>
+          <a href="#">Венчание</a>
+          <a href="#">Исповедь</a>
+          <a href="#">Причастие</a>
+          <a href="#">Записки</a>
+          <a href="#">Беседа</a>
+        </div>
+      </section>
+
+      <section class="section history" id="history">
+        <div class="section-heading">
+          <p class="section-label">Наследие</p>
+          <h2>Русская православная память Канн</h2>
+          <p>
+            Храм построен в конце XIX века и связан с русской общиной Лазурного
+            Берега. Для сайта важна не сухая хроника, а ясный рассказ: кто
+            строил, почему Канны стали местом русской жизни, какие святыни и
+            захоронения связаны с храмом, что сегодня нуждается в сохранении.
+          </p>
+        </div>
+        <div class="timeline">
+          <article>
+            <span>1894</span>
+            <p>Начало строительства русского православного храма в Каннах.</p>
+          </article>
+          <article>
+            <span>1896</span>
+            <p>Освящение храма и завершение колокольни.</p>
+          </article>
+          <article>
+            <span>XX век</span>
+            <p>Жизнь русской эмиграции, приходская школа, община и духовенство.</p>
+          </article>
+          <article>
+            <span>Сегодня</span>
+            <p>Регулярные богослужения, реставрационные задачи и открытость гостям.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section visit" id="visit">
+        <div>
+          <p class="section-label">Посетителям</p>
+          <h2>Как прийти в храм</h2>
+          <p>
+            Для Канн сайт должен быть понятен не только прихожанам, но и людям,
+            которые пришли как паломники или гости города. Этот раздел лучше
+            вести на русском, французском и английском.
+          </p>
+        </div>
+        <div class="visitor-rules">
+          <article>
+            <h3>Открытые часы</h3>
+            <p>Часы посещения, экскурсии, доступ в крипту и изменения в праздники.</p>
+          </article>
+          <article>
+            <h3>Поведение в храме</h3>
+            <p>Фотосъемка, свечи, одежда, тишина во время богослужения.</p>
+          </article>
+          <article>
+            <h3>Маршрут</h3>
+            <p>Пешком от Croisette, общественный транспорт, парковка поблизости.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section help" id="help">
+        <div>
+          <p class="section-label">Помощь храму</p>
+          <h2>Сохранить храм для молитвы и будущих поколений</h2>
+          <p>
+            Лучший формат раздела помощи: конкретные нужды, прозрачные реквизиты,
+            регулярные отчеты, возможность пожертвовать на реставрацию, свечи,
+            цветы, хор, школу и текущую приходскую жизнь.
+          </p>
+        </div>
+        <a class="button primary" href="#">Пожертвовать</a>
+      </section>
+
+      <section class="section news">
+        <div class="section-heading">
+          <p class="section-label">Новости</p>
+          <h2>Жизнь прихода</h2>
+        </div>
+        <div class="news-grid">
+          <article>
+            <time datetime="2026-06-19">19 июня 2026</time>
+            <h3>Обновление расписания богослужений</h3>
+            <p>Короткая новость с переходом в полный календарь.</p>
+          </article>
+          <article>
+            <time datetime="2026-06-12">12 июня 2026</time>
+            <h3>Приходская встреча после Литургии</h3>
+            <p>Анонсы лучше делать краткими и легко читаемыми с телефона.</p>
+          </article>
+          <article>
+            <time datetime="2026-06-01">1 июня 2026</time>
+            <h3>Материалы об истории храма</h3>
+            <p>Архивы, публикации и фотографии стоит вынести в отдельную медиатеку.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section contacts" id="contacts">
+        <div>
+          <p class="section-label">Контакты</p>
+          <h2>Приход Архангела Михаила</h2>
+          <address>
+            40 boulevard Alexandre III<br>
+            06400 Cannes, France
+          </address>
+          <p>Email: contact@saint-michel-cannes.example</p>
+          <p>Телефон: +33 0 00 00 00 00</p>
+        </div>
+        <div class="map-placeholder" aria-label="Место для карты">
+          <span>Карта / Google Maps / OpenStreetMap</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>© Приход Архистратига Михаила в Каннах</p>
+      <p>Прототип структуры и дизайна. Тексты, контакты и расписание требуют подтверждения приходом.</p>
+    </footer>
+  </body>
+</html>

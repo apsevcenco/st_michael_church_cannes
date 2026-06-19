@@ -226,6 +226,24 @@ h3 {
   gap: 1px;
 }
 
+.api-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  justify-content: center;
+  max-width: 1180px;
+  margin: 18px auto 0;
+  padding: 0 clamp(18px, 4vw, 32px);
+  color: var(--muted);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.api-status strong {
+  color: var(--green);
+}
+
 .quick-panel article {
   min-height: 136px;
   padding: 24px;

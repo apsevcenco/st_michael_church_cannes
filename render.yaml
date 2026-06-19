@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: st-michael-church-cannes-frontend
+    runtime: static
+    repo: https://github.com/apsevcenco/st_michael_church_cannes.git
+    branch: main
+    rootDir: frontend
+    buildCommand: echo "No frontend build step"
+    staticPublishPath: .
+    autoDeployTrigger: commit
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+
+  - type: web
+    name: st-michael-church-cannes-backend
+    runtime: node
+    repo: https://github.com/apsevcenco/st_michael_church_cannes.git
+    branch: main
+    rootDir: backend
+    plan: free
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: FRONTEND_ORIGIN
+        value: "*"
