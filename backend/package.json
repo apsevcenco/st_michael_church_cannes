@@ -5,6 +5,7 @@
   "description": "Backend API for the St Michael Church Cannes website.",
   "main": "server.js",
   "scripts": {
+    "build": "node --check server.js",
     "start": "node server.js",
     "check": "node --check server.js"
   },
