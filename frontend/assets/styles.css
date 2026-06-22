@@ -472,7 +472,8 @@ h3 {
   gap: 10px;
 }
 
-.link-grid a {
+.link-grid a,
+.link-grid-locked {
   min-height: 62px;
   padding: 18px;
   background: rgba(255, 255, 255, 0.11);
@@ -482,6 +483,19 @@ h3 {
   font-size: clamp(24px, 2.4vw, 34px);
   font-weight: 400;
   text-decoration: none;
+}
+
+.link-grid-locked {
+  display: block;
+  opacity: 0.42;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.link-grid-locked::after {
+  content: " 🔒";
+  font-size: 0.55em;
+  vertical-align: middle;
 }
 
 .sacrament-subnav {
