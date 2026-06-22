@@ -924,25 +924,34 @@ h3 {
     display: none;
   }
 
-  /* Logo icon takes too much room on mobile — hide it */
+  /* Shrink logo so text has room, but keep it visible */
   .brand-mark {
-    display: none;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
   }
 
-  /* Brand text: bigger, single line each */
+  /* Brand: logo + text fills the whole 1fr column */
+  .brand {
+    gap: 10px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
   .brand > span:last-child {
     min-width: 0;
+    overflow: hidden;
   }
 
   .brand strong {
-    font-size: clamp(15px, 4.5vw, 22px);
+    font-size: clamp(16px, 4.8vw, 24px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .brand small {
-    font-size: clamp(11px, 3vw, 14px);
+    font-size: clamp(11px, 3.2vw, 15px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
