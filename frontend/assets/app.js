@@ -22,6 +22,14 @@
   btn.innerHTML = '<span></span><span></span><span></span>';
   header.appendChild(btn);
 
+  // Keep CSS var --header-h in sync so the fixed nav dropdown
+  // knows exactly where to appear (just below the sticky header)
+  function syncHeaderH() {
+    document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+  }
+  syncHeaderH();
+  window.addEventListener('resize', syncHeaderH);
+
   function closeMenu() {
     nav.classList.remove('nav-open');
     btn.classList.remove('is-open');
@@ -30,6 +38,8 @@
 
   btn.addEventListener('click', function (e) {
     e.stopPropagation();
+    // Re-sync height in case header reflowed (e.g. soft keyboard open)
+    syncHeaderH();
     var isOpen = nav.classList.toggle('nav-open');
     btn.classList.toggle('is-open', isOpen);
     btn.setAttribute('aria-expanded', String(isOpen));
