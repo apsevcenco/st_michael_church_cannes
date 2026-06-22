@@ -134,7 +134,7 @@ a {
 
 .lang-switch {
   display: inline-flex;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
 }
 
@@ -142,30 +142,22 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 28px;
-  border: 2px solid rgba(184, 138, 52, 0.5);
-  border-radius: 0;
-  background: rgba(184, 138, 52, 0.08);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1;
   text-decoration: none;
-  opacity: 0.7;
-  transition: opacity 0.2s, border-color 0.2s, background 0.2s;
+  opacity: 0.55;
+  transition: opacity 0.2s, transform 0.15s;
 }
 
 .lang-switch a:hover {
-  opacity: 1;
-  border-color: var(--gold);
+  opacity: 0.85;
+  transform: scale(1.12);
 }
 
 .lang-switch .active {
-  border-color: var(--gold);
-  background: rgba(184, 138, 52, 0.25);
   opacity: 1;
-  box-shadow: 0 0 0 1px var(--gold);
+  transform: scale(1.15);
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.35));
 }
 
 .hero {
@@ -187,7 +179,7 @@ a {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(13, 20, 25, 0.82), rgba(13, 20, 25, 0.22) 58%, rgba(13, 20, 25, 0.48));
+  background: linear-gradient(105deg, rgba(8, 14, 20, 0.88) 0%, rgba(8, 14, 20, 0.55) 55%, rgba(8, 14, 20, 0.70) 100%);
   z-index: 1;
 }
 
@@ -207,9 +199,11 @@ a {
 
 .hero-overlay {
   position: relative;
+  z-index: 2;
   max-width: 760px;
   padding: clamp(28px, 7vw, 88px);
   color: white;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
 }
 
 .kicker,
@@ -285,15 +279,30 @@ h3 {
 
 .button.primary {
   border: 2px solid var(--gold);
-  background: rgba(184, 138, 52, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #f5e6c0;
+  background: rgba(184, 138, 52, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.03em;
+}
+
+.button.primary:hover {
+  background: rgba(184, 138, 52, 0.8);
 }
 
 .button.ghost {
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: white;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.03em;
+}
+
+.button.ghost:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .quick-panel {
@@ -867,17 +876,74 @@ h3 {
   margin: 0;
 }
 
+/* Hamburger button — hidden on desktop */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 9px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.hamburger-btn span {
+  display: block;
+  height: 2px;
+  background: var(--gold-dark);
+  border-radius: 1px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  transform-origin: center;
+}
+
+.hamburger-btn.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger-btn.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger-btn.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
 @media (max-width: 900px) {
   .site-header {
     grid-template-columns: 1fr auto;
+    overflow: visible;
+  }
+
+  .hamburger-btn {
+    display: flex;
   }
 
   .main-nav {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 2px;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 6px 0 12px;
+    background: rgba(247, 245, 239, 0.97);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 3px double var(--gold);
+    box-shadow: 0 16px 48px rgba(29, 39, 48, 0.22);
+    z-index: 200;
+    font-size: clamp(20px, 4vw, 26px);
+  }
+
+  .main-nav.nav-open {
+    display: flex;
+  }
+
+  .main-nav a {
+    padding: 13px 28px;
+    border-bottom: 1px solid rgba(184, 138, 52, 0.15);
+  }
+
+  .main-nav a:last-child {
+    border-bottom: none;
   }
 
   .quick-panel,
@@ -919,17 +985,13 @@ h3 {
 }
 
 @media (max-width: 620px) {
-  .site-header {
-    position: static;
-  }
-
   .brand strong {
-    font-size: 22px;
+    font-size: clamp(18px, 4.5vw, 24px);
   }
 
   .brand small {
-    max-width: 190px;
-    font-size: 13px;
+    max-width: 200px;
+    font-size: clamp(12px, 2.8vw, 15px);
   }
 
   .hero {
