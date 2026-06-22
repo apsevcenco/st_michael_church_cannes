@@ -15,6 +15,7 @@
   var nav = document.querySelector('.main-nav');
   if (!header || !nav) return;
 
+  // Inject hamburger button
   var btn = document.createElement('button');
   btn.className = 'hamburger-btn';
   btn.setAttribute('aria-label', 'Меню');
@@ -22,8 +23,15 @@
   btn.innerHTML = '<span></span><span></span><span></span>';
   header.appendChild(btn);
 
-  // Keep CSS var --header-h in sync so the fixed nav dropdown
-  // knows exactly where to appear (just below the sticky header)
+  // Clone language flags into the bottom of the dropdown nav
+  var langSwitch = document.querySelector('.church-lang-switch');
+  if (langSwitch) {
+    var langRow = langSwitch.cloneNode(true);
+    langRow.className = 'nav-lang-row';
+    nav.appendChild(langRow);
+  }
+
+  // Keep --header-h in sync so the fixed nav panel appears just below the sticky header
   function syncHeaderH() {
     document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
   }
@@ -38,7 +46,6 @@
 
   btn.addEventListener('click', function (e) {
     e.stopPropagation();
-    // Re-sync height in case header reflowed (e.g. soft keyboard open)
     syncHeaderH();
     var isOpen = nav.classList.toggle('nav-open');
     btn.classList.toggle('is-open', isOpen);
