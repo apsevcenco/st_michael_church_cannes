@@ -12,15 +12,24 @@
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="index.html"><span class="brand-mark"><img src="assets/logo.jpg" alt="Икона Архангела Михаила"></span><span><strong>Община Корсунской епархии</strong><small>при Михаило-Архангельском храме</small></span></a>
-      <nav class="main-nav"><a href="history.html">История</a><a href="schedule.html">Богослужения</a><a href="sacraments.html">Таинства</a><a href="help.html">Помощь</a><a href="contacts.html">Контакты</a></nav>
+      <a class="brand" href="index.html">
+        <span class="brand-mark"><img src="assets/logo.jpg" alt="Икона Архангела Михаила"></span>
+        <span><strong>Община Корсунской епархии</strong><small>при Михаило-Архангельском храме</small></span>
+      </a>
+      <nav class="main-nav">
+        <a href="history.html">История</a>
+        <a href="schedule.html">Богослужения</a>
+        <a href="sacraments.html">Таинства</a>
+        <a href="help.html">Помощь</a>
+        <a href="contacts.html">Контакты</a>
+      </nav>
     </header>
 
     <main>
       <section class="page-hero">
         <p class="section-label">Администрирование</p>
         <h1>Панель управления сайтом</h1>
-        <p>Подключение к Supabase, вход администратора, редактирование расписания, новостей и текстов страниц.</p>
+        <p>Редактирование текстов всех разделов, загрузка фотографий, PDF-расписаний и файлов через Supabase.</p>
       </section>
 
       <section class="section admin-shell">
@@ -31,41 +40,159 @@
             <label>Anon public key<input id="supabase-key" type="password" placeholder="eyJ..."></label>
             <div class="admin-actions"><button class="primary" type="submit">Подключить</button></div>
           </form>
-          <p class="admin-status" id="connection-status">Введите параметры Supabase или задайте window.ST_MICHAEL_SUPABASE_URL / window.ST_MICHAEL_SUPABASE_ANON_KEY.</p>
+          <p class="admin-status" id="connection-status">Параметры Supabase берутся из assets/site-config.js.</p>
 
           <h2>Вход</h2>
           <form class="admin-form" id="login-form">
             <label>Email<input id="admin-email" type="email" autocomplete="email"></label>
             <label>Пароль<input id="admin-password" type="password" autocomplete="current-password"></label>
-            <div class="admin-actions"><button class="primary" type="submit">Войти</button><button type="button" id="logout-button">Выйти</button></div>
+            <div class="admin-actions">
+              <button class="primary" type="submit">Войти</button>
+              <button type="button" id="logout-button">Выйти</button>
+            </div>
           </form>
           <p class="admin-status" id="auth-status">Ожидание входа.</p>
+
+          <div class="admin-note">
+            <strong>Важно</strong>
+            <p>Для загрузки файлов в Supabase должен быть создан bucket <code>parish-media</code>. SQL для этого добавлен в миграции проекта.</p>
+          </div>
         </aside>
 
         <section class="admin-panel">
-          <h2>Редактор</h2>
+          <h2>Редактор сайта</h2>
           <div class="admin-tabs" role="tablist">
-            <button class="active" type="button" data-tab="services">Расписание</button>
-            <button type="button" data-tab="news">Новости</button>
-            <button type="button" data-tab="pages">Страницы</button>
+            <button class="active" type="button" data-tab="content">Тексты разделов</button>
+            <button type="button" data-tab="media">Фото и файлы</button>
+            <button type="button" data-tab="legacy">Старые записи</button>
           </div>
 
-          <form class="admin-form" id="editor-form">
-            <input id="record-id" type="hidden">
-            <label>Раздел<select id="record-type"><option value="services">Расписание</option><option value="news">Новости</option><option value="pages">Страницы</option></select></label>
-            <label>Дата / ключ<input id="record-date" type="text" placeholder="2026-06-21 или history"></label>
-            <label>Заголовок<input id="record-title" type="text" placeholder="Божественная литургия"></label>
-            <label>Описание<textarea id="record-body" placeholder="Текст записи"></textarea></label>
-            <label>Сортировка<input id="record-sort" type="number" value="0"></label>
-            <div class="admin-actions">
-              <button class="primary" type="submit">Сохранить</button>
-              <button type="button" id="new-record-button">Новая запись</button>
-              <button type="button" id="delete-record-button">Удалить</button>
-            </div>
-          </form>
+          <div class="admin-tab-panel active" data-panel="content">
+            <form class="admin-form" id="content-form">
+              <input id="content-id" type="hidden">
+              <div class="admin-grid-two">
+                <label>Страница / раздел
+                  <select id="content-page">
+                    <option value="home">Главная</option>
+                    <option value="history">История</option>
+                    <option value="schedule">Богослужения</option>
+                    <option value="sacraments">Таинства</option>
+                    <option value="baptism">Крещение</option>
+                    <option value="wedding">Венчание</option>
+                    <option value="confession">Исповедь</option>
+                    <option value="communion">Причастие</option>
+                    <option value="notes">Записки</option>
+                    <option value="meeting">Беседа</option>
+                    <option value="help">Помощь</option>
+                    <option value="contacts">Контакты</option>
+                    <option value="visit">Посетителям</option>
+                    <option value="news">Новости</option>
+                  </select>
+                </label>
+                <label>Язык
+                  <select id="content-language">
+                    <option value="ru">Русский</option>
+                    <option value="fr">Français</option>
+                    <option value="en">English</option>
+                  </select>
+                </label>
+              </div>
+              <div class="admin-grid-two">
+                <label>Тип блока
+                  <select id="content-section">
+                    <option value="hero">Верхний заголовок страницы</option>
+                    <option value="body">Основной текст</option>
+                    <option value="notice">Важное объявление</option>
+                    <option value="details">Дополнительный блок</option>
+                    <option value="contacts">Контактная информация</option>
+                    <option value="donation">Пожертвования</option>
+                  </select>
+                </label>
+                <label>Порядок<input id="content-sort" type="number" value="0"></label>
+              </div>
+              <label>Заголовок<input id="content-title" type="text" placeholder="Например: История прихода"></label>
+              <label>Краткое описание<textarea id="content-summary" placeholder="Короткий текст для верхнего блока страницы"></textarea></label>
+              <label>Основной текст<textarea id="content-body" class="admin-large-textarea" placeholder="Полный текст раздела. Можно использовать абзацы с пустой строкой между ними."></textarea></label>
+              <label>Статус
+                <select id="content-status">
+                  <option value="published">Опубликовано</option>
+                  <option value="draft">Черновик</option>
+                </select>
+              </label>
+              <div class="admin-actions">
+                <button class="primary" type="submit">Сохранить текст</button>
+                <button type="button" id="new-content-button">Новый текст</button>
+                <button type="button" id="delete-content-button">Удалить</button>
+              </div>
+            </form>
+            <div class="admin-list" id="content-list"></div>
+          </div>
 
-          <div class="admin-list" id="records-list"></div>
-          <p class="admin-status" id="editor-status">После подключения появятся записи выбранного раздела.</p>
+          <div class="admin-tab-panel" data-panel="media">
+            <form class="admin-form" id="media-form">
+              <input id="media-id" type="hidden">
+              <div class="admin-grid-two">
+                <label>Назначение
+                  <select id="media-purpose">
+                    <option value="schedule_pdf">PDF расписания</option>
+                    <option value="history_gallery">Фото для истории</option>
+                    <option value="home_hero">Фото главной страницы</option>
+                    <option value="page_gallery">Галерея страницы</option>
+                    <option value="donation_file">Файл для помощи</option>
+                    <option value="document">Документ</option>
+                  </select>
+                </label>
+                <label>Страница
+                  <select id="media-page">
+                    <option value="schedule">Богослужения</option>
+                    <option value="history">История</option>
+                    <option value="home">Главная</option>
+                    <option value="help">Помощь</option>
+                    <option value="contacts">Контакты</option>
+                    <option value="sacraments">Таинства</option>
+                    <option value="news">Новости</option>
+                  </select>
+                </label>
+              </div>
+              <label>Файл<input id="media-file" type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"></label>
+              <label>Название<input id="media-title" type="text" placeholder="Например: Расписание богослужений на июль"></label>
+              <label>Подпись / alt-текст<textarea id="media-description" placeholder="Описание фото или документа"></textarea></label>
+              <div class="admin-grid-two">
+                <label>Порядок<input id="media-sort" type="number" value="0"></label>
+                <label>Статус
+                  <select id="media-status">
+                    <option value="published">Опубликовано</option>
+                    <option value="draft">Черновик</option>
+                  </select>
+                </label>
+              </div>
+              <div class="admin-actions">
+                <button class="primary" type="submit">Загрузить / сохранить</button>
+                <button type="button" id="new-media-button">Новый файл</button>
+                <button type="button" id="delete-media-button">Удалить запись</button>
+              </div>
+            </form>
+            <div class="admin-list" id="media-list"></div>
+          </div>
+
+          <div class="admin-tab-panel" data-panel="legacy">
+            <form class="admin-form" id="legacy-form">
+              <input id="record-id" type="hidden">
+              <label>Раздел<select id="record-type"><option value="services">Расписание</option><option value="news">Новости</option><option value="pages">Страницы</option></select></label>
+              <label>Дата / ключ<input id="record-date" type="text" placeholder="2026-06-21 или history"></label>
+              <label>Заголовок<input id="record-title" type="text"></label>
+              <label>Описание<textarea id="record-body"></textarea></label>
+              <label>Сортировка<input id="record-sort" type="number" value="0"></label>
+              <div class="admin-actions">
+                <button class="primary" type="submit">Сохранить</button>
+                <button type="button" id="new-record-button">Новая запись</button>
+                <button type="button" id="delete-record-button">Удалить</button>
+              </div>
+            </form>
+            <div class="admin-list" id="records-list"></div>
+          </div>
+
+          <p class="admin-status" id="editor-status">Подключитесь к Supabase и войдите как администратор.</p>
         </section>
       </section>
     </main>

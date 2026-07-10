@@ -44,6 +44,7 @@
 6. Войти email/паролем пользователя Supabase Auth.
 
 Панель умеет читать, создавать, редактировать и удалять записи в таблицах `services`, `news`, `pages`.
+Новая CMS-часть использует таблицы `content_sections`, `media_files` и публичный Supabase Storage bucket `parish-media` для текстов, фотографий, PDF-расписаний и документов.
 
 ## Render
 
