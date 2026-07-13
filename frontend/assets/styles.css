@@ -574,6 +574,16 @@ h3 {
   min-height: 100vh;
 }
 
+.admin-page.is-login #admin-workspace,
+.admin-page.is-authenticated #login-screen,
+.admin-page:not(.is-authenticated) #admin-workspace {
+  display: none !important;
+}
+
+.admin-page.is-authenticated #admin-workspace {
+  display: block;
+}
+
 .admin-login-screen {
   min-height: 100vh;
   display: grid;

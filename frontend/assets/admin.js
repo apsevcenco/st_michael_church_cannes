@@ -224,11 +224,15 @@
   }
 
   function showLogin() {
+    document.body.classList.add("is-login");
+    document.body.classList.remove("is-authenticated");
     $("login-screen").hidden = false;
     $("admin-workspace").hidden = true;
   }
 
   function showWorkspace(email) {
+    document.body.classList.remove("is-login");
+    document.body.classList.add("is-authenticated");
     $("login-screen").hidden = true;
     $("admin-workspace").hidden = false;
     setText("admin-user-email", email || "");
