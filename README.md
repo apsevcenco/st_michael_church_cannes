@@ -52,6 +52,13 @@
 
 Workflow: `.github/workflows/supabase-migrations.yml`.
 
+Security hardening:
+
+- admin edit access is restricted by `public.admin_users`;
+- Supabase Auth login alone is not enough to manage the site;
+- setup and audit notes are in `docs/security-audit.md`;
+- after applying migrations, add the real admin email to `public.admin_users`.
+
 ## Render
 
 Blueprint поднимает два сервиса:

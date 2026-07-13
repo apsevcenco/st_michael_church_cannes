@@ -2,6 +2,14 @@ const http = require("node:http");
 
 const PORT = Number(process.env.PORT || 10000);
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "SAMEORIGIN",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'self'"
+};
 
 const siteInfo = {
   parish: "Parish of St Michael the Archangel in Cannes",
@@ -15,10 +23,12 @@ function sendJson(response, statusCode, payload) {
   const body = JSON.stringify(payload, null, 2);
 
   response.writeHead(statusCode, {
+    ...SECURITY_HEADERS,
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": FRONTEND_ORIGIN,
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
+    "Vary": "Origin",
     "Cache-Control": "no-store"
   });
 
@@ -28,11 +38,18 @@ function sendJson(response, statusCode, payload) {
 const server = http.createServer((request, response) => {
   if (request.method === "OPTIONS") {
     response.writeHead(204, {
+      ...SECURITY_HEADERS,
       "Access-Control-Allow-Origin": FRONTEND_ORIGIN,
       "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Vary": "Origin"
     });
     response.end();
+    return;
+  }
+
+  if (request.method !== "GET") {
+    sendJson(response, 405, { ok: false, error: "Method not allowed" });
     return;
   }
 

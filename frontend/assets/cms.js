@@ -27,6 +27,18 @@
       .replaceAll('"', "&quot;");
   }
 
+  function safePublicUrl(value) {
+    if (!value) return "";
+    try {
+      const url = new URL(value, window.location.origin);
+      if (!["https:", "http:"].includes(url.protocol)) return "";
+      if (url.protocol === "http:" && url.hostname !== window.location.hostname) return "";
+      return url.href;
+    } catch (_) {
+      return "";
+    }
+  }
+
   function paragraphsToHtml(text) {
     return String(text || "")
       .split(/\n{2,}/)
@@ -105,14 +117,15 @@
 
   function applySchedulePdf(media) {
     const pdf = media.find((item) => item.purpose === "schedule_pdf" && item.file_url);
-    if (!pdf) return;
+    const pdfUrl = safePublicUrl(pdf && pdf.file_url);
+    if (!pdf || !pdfUrl) return;
 
     const target = document.querySelector("[data-cms-documents]") || document.querySelector(".schedule-poster");
     if (!target) return;
 
     const link = document.createElement("a");
     link.className = "button primary cms-media-button";
-    link.href = pdf.file_url;
+    link.href = pdfUrl;
     link.target = "_blank";
     link.rel = "noopener";
     link.textContent = pdf.title || "Открыть PDF расписания богослужений";
@@ -120,9 +133,9 @@
   }
 
   function applyDocuments(media) {
-    const documents = media.filter((item) => {
-      return item.file_url && !(item.mime_type || "").startsWith("image/") && item.purpose !== "schedule_pdf";
-    });
+    const documents = media
+      .map((item) => ({ ...item, safe_url: safePublicUrl(item.file_url) }))
+      .filter((item) => item.safe_url && !(item.mime_type || "").startsWith("image/") && item.purpose !== "schedule_pdf");
     if (!documents.length) return;
 
     let target = document.querySelector("[data-cms-documents]");
@@ -137,7 +150,7 @@
     target.insertAdjacentHTML("beforeend", `
       <div class="document-list">
         ${documents.map((item) => `
-          <a class="info-card document-card" href="${item.file_url}" target="_blank" rel="noopener">
+          <a class="info-card document-card" href="${escapeHtml(item.safe_url)}" target="_blank" rel="noopener">
             <h2>${escapeHtml(item.title || item.file_name || "Документ")}</h2>
             ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ""}
           </a>
@@ -147,7 +160,9 @@
   }
 
   function applyGallery(media) {
-    const images = media.filter((item) => item.file_url && (item.mime_type || "").startsWith("image/"));
+    const images = media
+      .map((item) => ({ ...item, safe_url: safePublicUrl(item.file_url) }))
+      .filter((item) => item.safe_url && (item.mime_type || "").startsWith("image/"));
     if (!images.length) return;
 
     let gallery = document.querySelector("[data-cms-gallery]") || document.querySelector(".photo-gallery");
@@ -163,7 +178,7 @@
 
     gallery.innerHTML = images.map((item) => `
       <figure class="photo-card">
-        <img src="${item.file_url}" alt="${escapeHtml(item.description || item.title || "")}">
+        <img src="${escapeHtml(item.safe_url)}" alt="${escapeHtml(item.description || item.title || "")}" loading="lazy">
         <figcaption>${escapeHtml(item.title || item.description || "")}</figcaption>
       </figure>
     `).join("");
@@ -179,15 +194,18 @@
   }
 
   function renderNewsCard(item, photos, language) {
-    const firstPhoto = photos[0];
+    const safePhotos = (photos || [])
+      .map((photo) => ({ ...photo, safe_url: safePublicUrl(photo.file_url) }))
+      .filter((photo) => photo.safe_url);
+    const firstPhoto = safePhotos[0];
     return `
       <article class="news-card">
-        ${firstPhoto ? `<img class="news-card-image" src="${firstPhoto.file_url}" alt="${escapeHtml(firstPhoto.description || item.title)}">` : ""}
+        ${firstPhoto ? `<img class="news-card-image" src="${escapeHtml(firstPhoto.safe_url)}" alt="${escapeHtml(firstPhoto.description || item.title)}" loading="lazy">` : ""}
         <time>${escapeHtml(formatDate(item.event_date, language))}</time>
         <h3>${escapeHtml(item.title)}</h3>
         ${item.excerpt ? `<p>${escapeHtml(item.excerpt)}</p>` : ""}
         ${item.body ? `<details><summary>${language === "fr" ? "Lire la suite" : language === "en" ? "Read more" : "Читать полностью"}</summary>${paragraphsToHtml(item.body)}</details>` : ""}
-        ${photos.length > 1 ? `<div class="news-photo-strip">${photos.map((photo) => `<img src="${photo.file_url}" alt="${escapeHtml(photo.description || item.title)}">`).join("")}</div>` : ""}
+        ${safePhotos.length > 1 ? `<div class="news-photo-strip">${safePhotos.map((photo) => `<img src="${escapeHtml(photo.safe_url)}" alt="${escapeHtml(photo.description || item.title)}" loading="lazy">`).join("")}</div>` : ""}
       </article>
     `;
   }

@@ -1,5 +1,16 @@
 (function () {
   const MEDIA_BUCKET = "parish-media";
+  const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
+  const MAX_DOCUMENT_SIZE = 20 * 1024 * 1024;
+  const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+  const ALLOWED_DOCUMENT_TYPES = new Set([
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  ]);
+  const ALLOWED_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp", "gif", "pdf", "doc", "docx", "xls", "xlsx"]);
 
   const sections = [
     {
@@ -229,6 +240,61 @@
       .replace(/^-|-$/g, "");
   }
 
+  function fileExtension(file) {
+    const extension = String(file && file.name ? file.name.split(".").pop() : "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+    return ALLOWED_EXTENSIONS.has(extension) ? extension : "";
+  }
+
+  function isImageFile(file) {
+    return Boolean(file && ALLOWED_IMAGE_TYPES.has(file.type) && fileExtension(file));
+  }
+
+  function isDocumentFile(file) {
+    return Boolean(file && ALLOWED_DOCUMENT_TYPES.has(file.type) && fileExtension(file));
+  }
+
+  function validateUploadFile(file) {
+    if (!file) return { ok: true };
+    const extension = fileExtension(file);
+    if (!extension) return { ok: false, message: "Недопустимое расширение файла." };
+
+    if (activeSection.imagesOnly || file.type.startsWith("image/")) {
+      if (!isImageFile(file)) return { ok: false, message: "Можно загружать только JPG, PNG, WEBP или GIF." };
+      if (file.size > MAX_IMAGE_SIZE) return { ok: false, message: "Фото слишком большое. Максимум 8 МБ." };
+      return { ok: true };
+    }
+
+    if (activeSection.pdfOnly) {
+      if (!(file.type === "application/pdf" && extension === "pdf")) return { ok: false, message: "В этот раздел можно загрузить только PDF." };
+      if (file.size > MAX_DOCUMENT_SIZE) return { ok: false, message: "PDF слишком большой. Максимум 20 МБ." };
+      return { ok: true };
+    }
+
+    if (!isDocumentFile(file)) return { ok: false, message: "Разрешены только изображения, PDF, DOC/DOCX и XLS/XLSX." };
+    if (file.size > MAX_DOCUMENT_SIZE) return { ok: false, message: "Файл слишком большой. Максимум 20 МБ." };
+    return { ok: true };
+  }
+
+  async function isCurrentUserAdmin(user) {
+    if (!client || !user) return false;
+    const { data, error } = await client
+      .from("admin_users")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    return !error && Boolean(data);
+  }
+
+  async function requireAdminSession(user) {
+    if (await isCurrentUserAdmin(user)) return true;
+    await client.auth.signOut();
+    setText("auth-status", "Доступ запрещен: пользователь не добавлен в список администраторов.");
+    showLogin();
+    return false;
+  }
+
   function showLogin() {
     document.body.classList.add("is-login");
     document.body.classList.remove("is-authenticated");
@@ -259,7 +325,7 @@
     if (!client) return;
     const { data } = await client.auth.getSession();
     const user = data.session && data.session.user;
-    if (user) showWorkspace(user.email);
+    if (user && await requireAdminSession(user)) showWorkspace(user.email);
     else showLogin();
   }
 
@@ -604,11 +670,16 @@
       const startSort = Number(mediaFields.sort.value || mediaRecords.length || 0);
       const rows = [];
       for (const [index, uploadFile] of files.entries()) {
+        const validation = validateUploadFile(uploadFile);
+        if (!validation.ok) {
+          setText("editor-status", validation.message);
+          return;
+        }
         if (!uploadFile.type.startsWith("image/")) {
           setText("editor-status", "В раздел «Галерея» можно загружать только фотографии.");
           return;
         }
-        const extension = uploadFile.name.includes(".") ? uploadFile.name.split(".").pop() : "jpg";
+        const extension = fileExtension(uploadFile);
         const safeName = slugify(uploadFile.name.replace(/\.[^.]+$/, ""));
         const path = `${activeSection.key}/${mediaFields.purpose.value}/${Date.now()}-${index}-${safeName}.${extension}`;
         const { error: uploadError } = await client.storage.from(MEDIA_BUCKET).upload(path, uploadFile, {
@@ -647,6 +718,11 @@
     }
 
     if (file) {
+      const validation = validateUploadFile(file);
+      if (!validation.ok) {
+        setText("editor-status", validation.message);
+        return;
+      }
       if (activeSection.imagesOnly && !file.type.startsWith("image/")) {
         setText("editor-status", "В раздел «Галерея» можно загружать только фотографии.");
         return;
@@ -656,7 +732,7 @@
         return;
       }
 
-      const extension = file.name.includes(".") ? file.name.split(".").pop() : "bin";
+      const extension = fileExtension(file);
       const safeName = slugify(file.name.replace(/\.[^.]+$/, ""));
       storagePath = `${activeSection.key}/${mediaFields.purpose.value}/${Date.now()}-${safeName}.${extension}`;
       const { error: uploadError } = await client.storage.from(MEDIA_BUCKET).upload(storagePath, file, {
@@ -814,11 +890,16 @@
 
     const rows = [];
     for (const [index, file] of files.entries()) {
+      const validation = validateUploadFile(file);
+      if (!validation.ok) {
+        setText("editor-status", validation.message);
+        return false;
+      }
       if (!file.type.startsWith("image/")) {
         setText("editor-status", "К новости можно загружать только фотографии.");
         return false;
       }
-      const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
+      const extension = fileExtension(file);
       const safeName = slugify(file.name.replace(/\.[^.]+$/, ""));
       const path = `news/${newsId}/${Date.now()}-${index}-${safeName}.${extension}`;
       const { error: uploadError } = await client.storage.from(MEDIA_BUCKET).upload(path, file, {
@@ -932,7 +1013,7 @@
         return;
       }
 
-      showWorkspace(data.user.email);
+      if (await requireAdminSession(data.user)) showWorkspace(data.user.email);
     });
 
     $("logout-button").addEventListener("click", async () => {
