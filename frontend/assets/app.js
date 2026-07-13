@@ -23,6 +23,35 @@
     });
   });
 
+  function pageHomeFor(file) {
+    if (file === 'fr.html' || file.endsWith('-fr.html')) return 'fr.html';
+    if (file === 'en.html' || file.endsWith('-en.html')) return 'en.html';
+    return 'index.html';
+  }
+
+  function addBackButton() {
+    if (currentPage === 'index.html' || currentPage === 'fr.html' || currentPage === 'en.html' || currentPage === 'admin.html') return;
+    var main = document.querySelector('main');
+    if (!main || document.querySelector('.page-back')) return;
+
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'page-back';
+    button.textContent = 'Назад';
+    button.setAttribute('aria-label', 'Вернуться назад');
+    button.addEventListener('click', function () {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = pageHomeFor(currentPage);
+      }
+    });
+
+    main.insertBefore(button, main.firstElementChild);
+  }
+
+  addBackButton();
+
   // Hero slideshow
   var slides = document.querySelectorAll('.hero-slide');
   if (slides.length >= 2) {

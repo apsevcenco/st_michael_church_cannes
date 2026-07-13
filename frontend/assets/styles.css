@@ -518,6 +518,35 @@ h6 {
   font-weight: 700;
 }
 
+.page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px clamp(18px, 4vw, 56px) 0;
+  padding: 10px 16px;
+  background: rgba(255, 253, 247, 0.9);
+  border: 3px double rgba(184, 138, 52, 0.62);
+  border-radius: 8px;
+  color: var(--gold-dark);
+  cursor: pointer;
+  font-family: var(--church-heading-font);
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1;
+  box-shadow: var(--soft-shadow);
+}
+
+.page-back::before {
+  content: "<";
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.8em;
+}
+
+.page-back:hover {
+  background: var(--ivory);
+  border-color: var(--gold);
+  color: var(--burgundy);
+}
+
 .intro-grid,
 .two-columns,
 .visit,
@@ -685,7 +714,7 @@ h6 {
 }
 
 .sacrament-subnav {
-  display: grid;
+  display: none;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
   max-width: 1180px;
