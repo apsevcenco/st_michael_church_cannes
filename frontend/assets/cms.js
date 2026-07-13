@@ -156,15 +156,34 @@
     const target = document.querySelector("[data-cms-documents]") || document.querySelector(".schedule-poster");
     if (!target) return;
 
+    target.querySelector(".pdf-viewer")?.remove();
+    target.querySelector(".cms-media-button")?.remove();
+
+    const viewer = document.createElement("div");
+    viewer.className = "pdf-viewer";
+
+    const frame = document.createElement("iframe");
+    frame.className = "pdf-viewer-frame";
+    frame.title = pdf.title || "?????????? ????????????";
+    frame.src = pdfUrl;
+    frame.loading = "lazy";
+    viewer.appendChild(frame);
+
+    const fallback = document.createElement("p");
+    fallback.className = "pdf-viewer-fallback";
+    fallback.textContent = "???? PDF ?? ???????????? ? ????????, ???????? ??? ? ????? ???????.";
+    viewer.appendChild(fallback);
+
     const link = document.createElement("a");
     link.className = "button primary cms-media-button";
     link.href = pdfUrl;
     link.target = "_blank";
     link.rel = "noopener";
-    link.textContent = pdf.title || "Открыть PDF расписания богослужений";
-    target.appendChild(link);
-  }
+    link.textContent = pdf.title || "??????? PDF ?????????? ????????????";
+    viewer.appendChild(link);
 
+    target.appendChild(viewer);
+  }
   function applyDocuments(media) {
     const documents = media
       .map((item) => ({ ...item, safe_url: safePublicUrl(item.file_url) }))
