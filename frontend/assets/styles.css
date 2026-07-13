@@ -87,6 +87,8 @@ a {
   background: var(--surface);
   border: 2px solid var(--gold);
   border-radius: 50%;
+  outline: 3px solid rgba(184, 138, 52, 0.72);
+  outline-offset: 3px;
   box-shadow: 0 8px 20px rgba(29, 39, 48, 0.18);
 }
 
