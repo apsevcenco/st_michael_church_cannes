@@ -1,36 +1,191 @@
 (function () {
   const MEDIA_BUCKET = "parish-media";
 
-  const tableMap = {
-    services: "services",
-    news: "news",
-    pages: "pages"
-  };
+  const sections = [
+    {
+      key: "home",
+      title: "Главная",
+      description: "Главный экран, вводный текст, основные фотографии и быстрые ссылки.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Основной текст"],
+        ["notice", "Объявление"]
+      ],
+      media: [
+        ["home_hero", "Фото главной страницы"],
+        ["page_gallery", "Галерея главной"]
+      ]
+    },
+    {
+      key: "history",
+      title: "История",
+      description: "История прихода, исторические фотографии и изображения для галереи.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Полная история"],
+        ["details", "Дополнительный блок"]
+      ],
+      media: [
+        ["history_gallery", "Фото для истории"],
+        ["document", "Исторический документ"]
+      ]
+    },
+    {
+      key: "schedule",
+      title: "Богослужения",
+      description: "Текстовое расписание, объявления и PDF-файлы расписаний.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Текст расписания"],
+        ["notice", "Важное объявление"]
+      ],
+      media: [
+        ["schedule_pdf", "PDF расписания"],
+        ["document", "Документ"]
+      ]
+    },
+    {
+      key: "sacraments",
+      title: "Таинства",
+      description: "Общая страница раздела о таинствах и церковных требах.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Общий текст"],
+        ["details", "Дополнительный блок"]
+      ],
+      media: [["page_gallery", "Фото раздела"]]
+    },
+    {
+      key: "baptism",
+      title: "Крещение",
+      description: "Текст о подготовке к Крещению и необходимые материалы.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Основной текст"],
+        ["details", "Порядок подготовки"]
+      ],
+      media: [["document", "Документ для Крещения"]]
+    },
+    {
+      key: "wedding",
+      title: "Венчание",
+      description: "Текст о Венчании, подготовке и необходимых документах.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Основной текст"],
+        ["details", "Порядок подготовки"]
+      ],
+      media: [["document", "Документ для Венчания"]]
+    },
+    {
+      key: "confession",
+      title: "Исповедь",
+      description: "Полный текст о таинстве Исповеди.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Основной текст"],
+        ["details", "Дополнительные факты"]
+      ],
+      media: [["document", "Материал для Исповеди"]]
+    },
+    {
+      key: "communion",
+      title: "Причастие",
+      description: "Полный текст о таинстве Причастия.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Основной текст"],
+        ["details", "Дополнительные факты"]
+      ],
+      media: [["document", "Материал для Причастия"]]
+    },
+    {
+      key: "notes",
+      title: "Записки",
+      description: "Тексты о записках, поминовении, правилах подачи имен.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Основной текст"],
+        ["details", "Правила написания"]
+      ],
+      media: [["document", "Бланк или документ"]]
+    },
+    {
+      key: "meeting",
+      title: "Беседа",
+      description: "Запись на беседу со священником и пояснительный текст.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Основной текст"],
+        ["contacts", "Как записаться"]
+      ],
+      media: [["document", "Документ"]]
+    },
+    {
+      key: "help",
+      title: "Помощь",
+      description: "Пожертвования, банковские реквизиты, документы и ссылки оплаты.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Основной текст"],
+        ["donation", "Банковские реквизиты"],
+        ["details", "Онлайн-пожертвование"]
+      ],
+      media: [
+        ["donation_file", "Файл с реквизитами"],
+        ["document", "Документ"]
+      ]
+    },
+    {
+      key: "contacts",
+      title: "Контакты",
+      description: "Адрес, телефон, email, карта и контактный текст.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["contacts", "Контактные данные"],
+        ["details", "Карта и маршрут"]
+      ],
+      media: [["document", "Документ"]]
+    },
+    {
+      key: "visit",
+      title: "Посетителям",
+      description: "Адрес, правила посещения, маршрут и информация для гостей.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Основной текст"],
+        ["details", "Правила посещения"]
+      ],
+      media: [["document", "Документ"]]
+    },
+    {
+      key: "news",
+      title: "Новости",
+      description: "Приходские новости, объявления и изображения.",
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Новость или объявление"],
+        ["notice", "Важная новость"]
+      ],
+      media: [
+        ["page_gallery", "Фото новости"],
+        ["document", "Документ"]
+      ]
+    }
+  ];
 
   let client = null;
-  let activePanel = "content";
-  let legacyTab = "services";
+  let activeSection = sections[0];
+  let activeLanguage = "ru";
+  let activeBlock = "hero";
   let contentRecords = [];
   let mediaRecords = [];
-  let legacyRecords = [];
 
   const $ = (id) => document.getElementById(id);
 
-  const legacyFields = {
-    id: $("record-id"),
-    type: $("record-type"),
-    date: $("record-date"),
-    title: $("record-title"),
-    body: $("record-body"),
-    sort: $("record-sort")
-  };
-
   const contentFields = {
     id: $("content-id"),
-    page: $("content-page"),
-    language: $("content-language"),
     section: $("content-section"),
-    sort: $("content-sort"),
     title: $("content-title"),
     summary: $("content-summary"),
     body: $("content-body"),
@@ -40,7 +195,6 @@
   const mediaFields = {
     id: $("media-id"),
     purpose: $("media-purpose"),
-    page: $("media-page"),
     file: $("media-file"),
     title: $("media-title"),
     description: $("media-description"),
@@ -69,79 +223,156 @@
       .replace(/^-|-$/g, "");
   }
 
-  function getStoredConfig() {
-    return {
-      url: window.ST_MICHAEL_SUPABASE_URL || localStorage.getItem("ST_MICHAEL_SUPABASE_URL") || "",
-      key: window.ST_MICHAEL_SUPABASE_ANON_KEY || localStorage.getItem("ST_MICHAEL_SUPABASE_ANON_KEY") || ""
-    };
+  function showLogin() {
+    $("login-screen").hidden = false;
+    $("admin-workspace").hidden = true;
   }
 
-  function connect(url, key) {
-    if (!url || !key || !window.supabase) {
-      setText("connection-status", "Нет URL/key или не загрузилась библиотека Supabase.");
-      return;
+  function showWorkspace(email) {
+    $("login-screen").hidden = true;
+    $("admin-workspace").hidden = false;
+    setText("admin-user-email", email || "");
+    loadSectionData();
+  }
+
+  function connect() {
+    if (!window.supabase || !window.ST_MICHAEL_SUPABASE_URL || !window.ST_MICHAEL_SUPABASE_ANON_KEY) {
+      setText("auth-status", "Не удалось подключить сайт к Supabase. Проверьте настройки проекта.");
+      return false;
     }
 
-    client = window.supabase.createClient(url, key);
-    localStorage.setItem("ST_MICHAEL_SUPABASE_URL", url);
-    localStorage.setItem("ST_MICHAEL_SUPABASE_ANON_KEY", key);
-    setText("connection-status", "Supabase подключен.");
-    refreshSession();
-    loadActivePanel();
+    client = window.supabase.createClient(window.ST_MICHAEL_SUPABASE_URL, window.ST_MICHAEL_SUPABASE_ANON_KEY);
+    return true;
   }
 
-  async function refreshSession() {
+  async function checkSession() {
     if (!client) return;
     const { data } = await client.auth.getSession();
-    const email = data.session && data.session.user ? data.session.user.email : null;
-    setText("auth-status", email ? `Вход выполнен: ${email}` : "Ожидание входа.");
+    const user = data.session && data.session.user;
+    if (user) showWorkspace(user.email);
+    else showLogin();
   }
 
-  function switchPanel(panel) {
-    activePanel = panel;
-    document.querySelectorAll(".admin-tabs button").forEach((button) => {
-      button.classList.toggle("active", button.dataset.tab === panel);
+  function renderSectionMenu() {
+    const menu = $("section-menu");
+    menu.innerHTML = "";
+    sections.forEach((section) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = section.key === activeSection.key ? "active" : "";
+      button.textContent = section.title;
+      button.addEventListener("click", () => selectSection(section.key));
+      menu.appendChild(button);
     });
-    document.querySelectorAll(".admin-tab-panel").forEach((node) => {
-      node.classList.toggle("active", node.dataset.panel === panel);
-    });
-    loadActivePanel();
   }
 
-  function loadActivePanel() {
-    if (activePanel === "content") loadContentRecords();
-    if (activePanel === "media") loadMediaRecords();
-    if (activePanel === "legacy") loadLegacyRecords();
+  function renderBlockTabs() {
+    const tabs = $("content-block-tabs");
+    tabs.innerHTML = "";
+    activeSection.blocks.forEach(([key, label]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = key === activeBlock ? "active" : "";
+      button.textContent = label;
+      button.addEventListener("click", () => selectBlock(key));
+      tabs.appendChild(button);
+    });
+  }
+
+  function renderMediaPurposes() {
+    mediaFields.purpose.innerHTML = "";
+    activeSection.media.forEach(([key, label]) => {
+      const option = document.createElement("option");
+      option.value = key;
+      option.textContent = label;
+      mediaFields.purpose.appendChild(option);
+    });
+    $("media-panel").hidden = activeSection.media.length === 0;
+  }
+
+  function renderLanguageButtons() {
+    document.querySelectorAll(".admin-language-switch button").forEach((button) => {
+      button.classList.toggle("active", button.dataset.language === activeLanguage);
+    });
+  }
+
+  function renderSectionHeader() {
+    setText("section-kicker", "Раздел сайта");
+    setText("section-title", activeSection.title);
+    setText("section-description", activeSection.description);
+  }
+
+  function selectSection(key) {
+    activeSection = sections.find((section) => section.key === key) || sections[0];
+    activeBlock = activeSection.blocks[0][0];
+    clearContentForm();
+    clearMediaForm();
+    renderSectionMenu();
+    renderSectionHeader();
+    renderBlockTabs();
+    renderMediaPurposes();
+    loadSectionData();
+  }
+
+  function selectBlock(key) {
+    activeBlock = key;
+    clearContentForm();
+    renderBlockTabs();
+    fillContentFromExisting();
+  }
+
+  function selectLanguage(language) {
+    activeLanguage = language;
+    clearContentForm();
+    renderLanguageButtons();
+    loadContentRecords();
+  }
+
+  async function loadSectionData() {
+    if (!client || $("admin-workspace").hidden) return;
+    renderSectionMenu();
+    renderSectionHeader();
+    renderBlockTabs();
+    renderMediaPurposes();
+    renderLanguageButtons();
+    await Promise.all([loadContentRecords(), loadMediaRecords()]);
   }
 
   function contentPayload() {
     return {
-      page_key: contentFields.page.value,
-      language: contentFields.language.value,
-      section_key: contentFields.section.value,
+      page_key: activeSection.key,
+      language: activeLanguage,
+      section_key: activeBlock,
       title: contentFields.title.value.trim(),
       summary: contentFields.summary.value.trim(),
       body: contentFields.body.value.trim(),
       status: contentFields.status.value,
-      sort_order: Number(contentFields.sort.value || 0),
+      sort_order: activeSection.blocks.findIndex(([key]) => key === activeBlock),
       updated_at: new Date().toISOString()
     };
   }
 
+  function clearContentForm() {
+    contentFields.id.value = "";
+    contentFields.section.value = activeBlock;
+    contentFields.title.value = "";
+    contentFields.summary.value = "";
+    contentFields.body.value = "";
+    contentFields.status.value = "published";
+  }
+
   function fillContentForm(record) {
     contentFields.id.value = record.id || "";
-    contentFields.page.value = record.page_key || "home";
-    contentFields.language.value = record.language || "ru";
-    contentFields.section.value = record.section_key || "hero";
-    contentFields.sort.value = record.sort_order || 0;
+    contentFields.section.value = record.section_key || activeBlock;
     contentFields.title.value = record.title || "";
     contentFields.summary.value = record.summary || "";
     contentFields.body.value = record.body || "";
     contentFields.status.value = record.status || "published";
   }
 
-  function clearContentForm() {
-    fillContentForm({ sort_order: 0, status: "published" });
+  function fillContentFromExisting() {
+    const record = contentRecords.find((item) => item.section_key === activeBlock);
+    if (record) fillContentForm(record);
   }
 
   async function loadContentRecords() {
@@ -149,47 +380,56 @@
     const { data, error } = await client
       .from("content_sections")
       .select("*")
-      .order("page_key", { ascending: true })
-      .order("language", { ascending: true })
+      .eq("page_key", activeSection.key)
+      .eq("language", activeLanguage)
       .order("sort_order", { ascending: true });
 
     if (error) {
       contentRecords = [];
       renderContentRecords();
-      setText("editor-status", `Ошибка чтения content_sections: ${error.message}`);
+      setText("editor-status", `Ошибка чтения текстов: ${error.message}`);
       return;
     }
 
     contentRecords = data || [];
     renderContentRecords();
-    setText("editor-status", `Текстовых блоков загружено: ${contentRecords.length}`);
+    fillContentFromExisting();
+    setText("editor-status", `Раздел «${activeSection.title}» загружен.`);
   }
 
   function renderContentRecords() {
     const list = $("content-list");
-    if (!list) return;
     list.innerHTML = "";
 
+    if (!contentRecords.length) {
+      list.innerHTML = '<div class="admin-empty">Для этого языка пока нет сохраненных текстов.</div>';
+      return;
+    }
+
     contentRecords.forEach((record) => {
+      const label = (activeSection.blocks.find(([key]) => key === record.section_key) || [record.section_key, record.section_key])[1];
       const button = document.createElement("button");
       button.type = "button";
       button.className = "admin-row";
-      button.innerHTML = `<strong>${escapeHtml(record.title || "Без заголовка")}</strong><br><span>${escapeHtml(record.page_key)} / ${escapeHtml(record.language)} / ${escapeHtml(record.section_key)} / ${escapeHtml(record.status)}</span>`;
-      button.addEventListener("click", () => fillContentForm(record));
+      button.innerHTML = `<strong>${escapeHtml(label)}</strong><br><span>${escapeHtml(record.title || "Без заголовка")} · ${escapeHtml(record.status)}</span>`;
+      button.addEventListener("click", () => {
+        activeBlock = record.section_key;
+        renderBlockTabs();
+        fillContentForm(record);
+      });
       list.appendChild(button);
     });
   }
 
   async function saveContent(event) {
     event.preventDefault();
-    if (!client) {
-      setText("editor-status", "Сначала подключите Supabase.");
-      return;
-    }
+    if (!client) return;
 
+    const existing = contentRecords.find((item) => item.section_key === activeBlock);
+    const id = contentFields.id.value || (existing && existing.id);
     const payload = contentPayload();
-    const query = contentFields.id.value
-      ? client.from("content_sections").update(payload).eq("id", contentFields.id.value)
+    const query = id
+      ? client.from("content_sections").update(payload).eq("id", id)
       : client.from("content_sections").insert(payload);
 
     const { error } = await query;
@@ -198,18 +438,20 @@
       return;
     }
 
-    clearContentForm();
     await loadContentRecords();
     setText("editor-status", "Текст сохранен.");
   }
 
   async function deleteContent() {
-    if (!client || !contentFields.id.value) return;
-    const { error } = await client.from("content_sections").delete().eq("id", contentFields.id.value);
+    const id = contentFields.id.value;
+    if (!client || !id) return;
+
+    const { error } = await client.from("content_sections").delete().eq("id", id);
     if (error) {
       setText("editor-status", `Ошибка удаления текста: ${error.message}`);
       return;
     }
+
     clearContentForm();
     await loadContentRecords();
     setText("editor-status", "Текст удален.");
@@ -217,7 +459,7 @@
 
   function mediaPayload(publicUrl, storagePath, file) {
     return {
-      page_key: mediaFields.page.value,
+      page_key: activeSection.key,
       purpose: mediaFields.purpose.value,
       title: mediaFields.title.value.trim() || (file ? file.name : ""),
       description: mediaFields.description.value.trim(),
@@ -232,40 +474,48 @@
     };
   }
 
+  function clearMediaForm() {
+    mediaFields.id.value = "";
+    mediaFields.file.value = "";
+    mediaFields.title.value = "";
+    mediaFields.description.value = "";
+    mediaFields.sort.value = "0";
+    mediaFields.status.value = "published";
+  }
+
   function fillMediaForm(record) {
     mediaFields.id.value = record.id || "";
-    mediaFields.purpose.value = record.purpose || "schedule_pdf";
-    mediaFields.page.value = record.page_key || "schedule";
+    mediaFields.purpose.value = record.purpose || activeSection.media[0][0];
+    mediaFields.file.value = "";
     mediaFields.title.value = record.title || "";
     mediaFields.description.value = record.description || "";
     mediaFields.sort.value = record.sort_order || 0;
     mediaFields.status.value = record.status || "published";
-    mediaFields.file.value = "";
-  }
-
-  function clearMediaForm() {
-    fillMediaForm({ sort_order: 0, status: "published" });
   }
 
   async function loadMediaRecords() {
-    if (!client) return;
+    if (!client || !activeSection.media.length) {
+      mediaRecords = [];
+      renderMediaRecords();
+      return;
+    }
+
     const { data, error } = await client
       .from("media_files")
       .select("*")
-      .order("page_key", { ascending: true })
+      .eq("page_key", activeSection.key)
       .order("purpose", { ascending: true })
       .order("sort_order", { ascending: true });
 
     if (error) {
       mediaRecords = [];
       renderMediaRecords();
-      setText("editor-status", `Ошибка чтения media_files: ${error.message}`);
+      setText("editor-status", `Ошибка чтения файлов: ${error.message}`);
       return;
     }
 
     mediaRecords = data || [];
     renderMediaRecords();
-    setText("editor-status", `Медиафайлов загружено: ${mediaRecords.length}`);
   }
 
   function renderMediaRecords() {
@@ -273,14 +523,20 @@
     if (!list) return;
     list.innerHTML = "";
 
+    if (!mediaRecords.length) {
+      list.innerHTML = '<div class="admin-empty">Для этого раздела пока нет загруженных файлов.</div>';
+      return;
+    }
+
     mediaRecords.forEach((record) => {
+      const label = (activeSection.media.find(([key]) => key === record.purpose) || [record.purpose, record.purpose])[1];
       const button = document.createElement("button");
       button.type = "button";
       button.className = "admin-row admin-media-row";
       const preview = record.mime_type && record.mime_type.startsWith("image/") && record.file_url
         ? `<img src="${escapeHtml(record.file_url)}" alt="">`
         : `<span class="admin-file-chip">${escapeHtml(record.mime_type || "file")}</span>`;
-      button.innerHTML = `${preview}<span><strong>${escapeHtml(record.title || record.file_name || "Без названия")}</strong><br><small>${escapeHtml(record.page_key)} / ${escapeHtml(record.purpose)} / ${escapeHtml(record.status)}</small></span>`;
+      button.innerHTML = `${preview}<span><strong>${escapeHtml(record.title || record.file_name || "Без названия")}</strong><br><small>${escapeHtml(label)} · ${escapeHtml(record.status)}</small></span>`;
       button.addEventListener("click", () => fillMediaForm(record));
       list.appendChild(button);
     });
@@ -288,10 +544,7 @@
 
   async function saveMedia(event) {
     event.preventDefault();
-    if (!client) {
-      setText("editor-status", "Сначала подключите Supabase.");
-      return;
-    }
+    if (!client) return;
 
     const file = mediaFields.file.files[0];
     const current = mediaRecords.find((record) => record.id === mediaFields.id.value);
@@ -301,7 +554,7 @@
     if (file) {
       const extension = file.name.includes(".") ? file.name.split(".").pop() : "bin";
       const safeName = slugify(file.name.replace(/\.[^.]+$/, ""));
-      storagePath = `${mediaFields.page.value}/${mediaFields.purpose.value}/${Date.now()}-${safeName}.${extension}`;
+      storagePath = `${activeSection.key}/${mediaFields.purpose.value}/${Date.now()}-${safeName}.${extension}`;
       const { error: uploadError } = await client.storage.from(MEDIA_BUCKET).upload(storagePath, file, {
         cacheControl: "3600",
         upsert: false
@@ -328,7 +581,7 @@
 
     const { error } = await query;
     if (error) {
-      setText("editor-status", `Ошибка сохранения медиа: ${error.message}`);
+      setText("editor-status", `Ошибка сохранения файла: ${error.message}`);
       return;
     }
 
@@ -338,166 +591,64 @@
   }
 
   async function deleteMedia() {
-    if (!client || !mediaFields.id.value) return;
-    const record = mediaRecords.find((item) => item.id === mediaFields.id.value);
+    const id = mediaFields.id.value;
+    if (!client || !id) return;
 
+    const record = mediaRecords.find((item) => item.id === id);
     if (record && record.storage_path) {
       await client.storage.from(MEDIA_BUCKET).remove([record.storage_path]);
     }
 
-    const { error } = await client.from("media_files").delete().eq("id", mediaFields.id.value);
+    const { error } = await client.from("media_files").delete().eq("id", id);
     if (error) {
-      setText("editor-status", `Ошибка удаления медиа: ${error.message}`);
+      setText("editor-status", `Ошибка удаления файла: ${error.message}`);
       return;
     }
 
     clearMediaForm();
     await loadMediaRecords();
-    setText("editor-status", "Медиа удалено.");
-  }
-
-  function legacyPayload() {
-    return {
-      item_date: legacyFields.date.value.trim(),
-      title: legacyFields.title.value.trim(),
-      body: legacyFields.body.value.trim(),
-      sort_order: Number(legacyFields.sort.value || 0),
-      updated_at: new Date().toISOString()
-    };
-  }
-
-  function fillLegacyForm(record) {
-    legacyFields.id.value = record.id || "";
-    legacyFields.type.value = legacyTab;
-    legacyFields.date.value = record.item_date || record.slug || record.date || "";
-    legacyFields.title.value = record.title || "";
-    legacyFields.body.value = record.body || record.content || record.description || "";
-    legacyFields.sort.value = record.sort_order || 0;
-  }
-
-  function clearLegacyForm() {
-    fillLegacyForm({ sort_order: 0 });
-  }
-
-  async function loadLegacyRecords() {
-    if (!client) return;
-    const table = tableMap[legacyTab];
-    const { data, error } = await client.from(table).select("*").order("sort_order", { ascending: true });
-
-    if (error) {
-      legacyRecords = [];
-      renderLegacyRecords();
-      setText("editor-status", `Ошибка чтения таблицы ${table}: ${error.message}`);
-      return;
-    }
-
-    legacyRecords = data || [];
-    renderLegacyRecords();
-    setText("editor-status", `Старых записей загружено: ${legacyRecords.length}`);
-  }
-
-  function renderLegacyRecords() {
-    const list = $("records-list");
-    if (!list) return;
-    list.innerHTML = "";
-
-    legacyRecords.forEach((record) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "admin-row";
-      button.innerHTML = `<strong>${escapeHtml(record.title || "Без названия")}</strong><br><span>${escapeHtml(record.item_date || record.slug || "")}</span>`;
-      button.addEventListener("click", () => fillLegacyForm(record));
-      list.appendChild(button);
-    });
-  }
-
-  async function saveLegacy(event) {
-    event.preventDefault();
-    if (!client) {
-      setText("editor-status", "Сначала подключите Supabase.");
-      return;
-    }
-
-    legacyTab = legacyFields.type.value;
-    const table = tableMap[legacyTab];
-    const payload = legacyPayload();
-    const query = legacyFields.id.value
-      ? client.from(table).update(payload).eq("id", legacyFields.id.value)
-      : client.from(table).insert(payload);
-
-    const { error } = await query;
-    if (error) {
-      setText("editor-status", `Ошибка сохранения: ${error.message}`);
-      return;
-    }
-
-    clearLegacyForm();
-    await loadLegacyRecords();
-    setText("editor-status", "Запись сохранена.");
-  }
-
-  async function deleteLegacy() {
-    if (!client || !legacyFields.id.value) return;
-    const table = tableMap[legacyTab];
-    const { error } = await client.from(table).delete().eq("id", legacyFields.id.value);
-
-    if (error) {
-      setText("editor-status", `Ошибка удаления: ${error.message}`);
-      return;
-    }
-
-    clearLegacyForm();
-    await loadLegacyRecords();
-    setText("editor-status", "Запись удалена.");
+    setText("editor-status", "Файл удален.");
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const config = getStoredConfig();
-    $("supabase-url").value = config.url;
-    $("supabase-key").value = config.key;
-    if (config.url && config.key) connect(config.url, config.key);
+    if (!connect()) return;
 
-    $("connection-form").addEventListener("submit", (event) => {
-      event.preventDefault();
-      connect($("supabase-url").value.trim(), $("supabase-key").value.trim());
-    });
+    renderSectionMenu();
+    renderSectionHeader();
+    renderBlockTabs();
+    renderMediaPurposes();
+    checkSession();
 
     $("login-form").addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (!client) return;
-      const { error } = await client.auth.signInWithPassword({
+      const { data, error } = await client.auth.signInWithPassword({
         email: $("admin-email").value.trim(),
         password: $("admin-password").value
       });
-      setText("auth-status", error ? `Ошибка входа: ${error.message}` : "Вход выполнен.");
-      refreshSession();
+
+      if (error) {
+        setText("auth-status", `Ошибка входа: ${error.message}`);
+        return;
+      }
+
+      showWorkspace(data.user.email);
     });
 
     $("logout-button").addEventListener("click", async () => {
-      if (!client) return;
       await client.auth.signOut();
-      refreshSession();
+      showLogin();
     });
 
-    document.querySelectorAll(".admin-tabs button").forEach((button) => {
-      button.addEventListener("click", () => switchPanel(button.dataset.tab));
-    });
-
-    legacyFields.type.addEventListener("change", () => {
-      legacyTab = legacyFields.type.value;
-      loadLegacyRecords();
+    document.querySelectorAll(".admin-language-switch button").forEach((button) => {
+      button.addEventListener("click", () => selectLanguage(button.dataset.language));
     });
 
     $("content-form").addEventListener("submit", saveContent);
-    $("new-content-button").addEventListener("click", clearContentForm);
+    $("clear-content-button").addEventListener("click", clearContentForm);
     $("delete-content-button").addEventListener("click", deleteContent);
 
     $("media-form").addEventListener("submit", saveMedia);
-    $("new-media-button").addEventListener("click", clearMediaForm);
+    $("clear-media-button").addEventListener("click", clearMediaForm);
     $("delete-media-button").addEventListener("click", deleteMedia);
-
-    $("legacy-form").addEventListener("submit", saveLegacy);
-    $("new-record-button").addEventListener("click", clearLegacyForm);
-    $("delete-record-button").addEventListener("click", deleteLegacy);
   });
 })();
