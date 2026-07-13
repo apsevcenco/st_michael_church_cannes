@@ -55,7 +55,7 @@
         ["body", "Текст расписания"]
       ],
       media: [["schedule_pdf", "PDF расписания богослужений"]],
-      pdfOnly: true
+      scheduleFileOnly: true
     },
     {
       key: "sacraments",
@@ -274,6 +274,12 @@
       return { ok: true };
     }
 
+    if (activeSection.scheduleFileOnly) {
+      if (!(file.type === "application/pdf" && extension === "pdf")) return { ok: false, message: "В расписание можно загрузить только PDF или изображение." };
+      if (file.size > MAX_DOCUMENT_SIZE) return { ok: false, message: "PDF слишком большой. Максимум 20 МБ." };
+      return { ok: true };
+    }
+
     if (activeSection.pdfOnly) {
       if (!(file.type === "application/pdf" && extension === "pdf")) return { ok: false, message: "В этот раздел можно загрузить только PDF." };
       if (file.size > MAX_DOCUMENT_SIZE) return { ok: false, message: "PDF слишком большой. Максимум 20 МБ." };
@@ -381,7 +387,7 @@
       option.textContent = label;
       mediaFields.purpose.appendChild(option);
     });
-    mediaFields.file.accept = activeSection.pdfOnly ? ".pdf,application/pdf" : activeSection.imagesOnly ? "image/*" : "image/*,.pdf,.doc,.docx,.xls,.xlsx";
+    mediaFields.file.accept = activeSection.scheduleFileOnly ? "image/*,.pdf,application/pdf" : activeSection.pdfOnly ? ".pdf,application/pdf" : activeSection.imagesOnly ? "image/*" : "image/*,.pdf,.doc,.docx,.xls,.xlsx";
     mediaFields.file.multiple = Boolean(activeSection.imagesOnly);
   }
 

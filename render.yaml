@@ -26,7 +26,7 @@ services:
         value: max-age=31536000; includeSubDomains
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; img-src 'self' data: https://mkaxtebegspaetwoxfgq.supabase.co https://commons.wikimedia.org https://upload.wikimedia.org; font-src 'self'; connect-src 'self' https://mkaxtebegspaetwoxfgq.supabase.co wss://mkaxtebegspaetwoxfgq.supabase.co; frame-src https://www.openstreetmap.org https://mkaxtebegspaetwoxfgq.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+        value: "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; img-src 'self' data: https://mkaxtebegspaetwoxfgq.supabase.co https://commons.wikimedia.org https://upload.wikimedia.org; font-src 'self'; connect-src 'self' https://mkaxtebegspaetwoxfgq.supabase.co wss://mkaxtebegspaetwoxfgq.supabase.co; frame-src https://www.openstreetmap.org; worker-src 'self' blob: https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
 
   - type: web
     name: st-michael-church-cannes-backend

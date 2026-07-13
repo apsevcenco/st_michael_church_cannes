@@ -148,7 +148,77 @@
     `).join("");
   }
 
-  function applySchedulePdf(media) {
+  const PDFJS_SCRIPT_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";
+  const PDFJS_WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+
+  function loadPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-pdfjs="true"]');
+      if (existing) {
+        existing.addEventListener("load", () => resolve(window.pdfjsLib));
+        existing.addEventListener("error", reject);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = PDFJS_SCRIPT_URL;
+      script.async = true;
+      script.dataset.pdfjs = "true";
+      script.onload = () => resolve(window.pdfjsLib);
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function renderPdfPages(pdfUrl, pagesContainer) {
+    const pdfjsLib = await loadPdfJs();
+    pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL;
+
+    const loadingTask = pdfjsLib.getDocument({ url: pdfUrl });
+    const pdfDocument = await loadingTask.promise;
+    const maxWidth = Math.min(pagesContainer.clientWidth || 920, 1100);
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+
+    pagesContainer.innerHTML = "";
+
+    for (let pageNumber = 1; pageNumber <= pdfDocument.numPages; pageNumber += 1) {
+      const page = await pdfDocument.getPage(pageNumber);
+      const baseViewport = page.getViewport({ scale: 1 });
+      const cssScale = Math.min(maxWidth / baseViewport.width, 1.65);
+      const viewport = page.getViewport({ scale: cssScale * pixelRatio });
+
+      const canvas = document.createElement("canvas");
+      canvas.className = "pdf-page-canvas";
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      canvas.style.width = `${Math.floor(viewport.width / pixelRatio)}px`;
+      canvas.style.height = `${Math.floor(viewport.height / pixelRatio)}px`;
+
+      const context = canvas.getContext("2d");
+      pagesContainer.appendChild(canvas);
+      await page.render({ canvasContext: context, viewport }).promise;
+    }
+  }
+
+  function isImageMedia(item) {
+    const mimeType = String(item && item.mime_type ? item.mime_type : "");
+    const fileName = String(item && (item.file_name || item.file_url) ? (item.file_name || item.file_url) : "").toLowerCase();
+    return mimeType.startsWith("image/") || /\.(jpe?g|png|webp|gif)(\?|#|$)/.test(fileName);
+  }
+
+  function renderScheduleImage(imageUrl, pagesContainer, title) {
+    pagesContainer.innerHTML = "";
+    const image = document.createElement("img");
+    image.className = "schedule-image-page";
+    image.src = imageUrl;
+    image.alt = title || "Расписание богослужений";
+    image.loading = "lazy";
+    pagesContainer.appendChild(image);
+  }
+
+  async function applySchedulePdf(media) {
     const pdf = media.find((item) => item.purpose === "schedule_pdf" && item.file_url);
     const pdfUrl = safePublicUrl(pdf && pdf.file_url);
     if (!pdf || !pdfUrl) return;
@@ -162,16 +232,14 @@
     const viewer = document.createElement("div");
     viewer.className = "pdf-viewer";
 
-    const frame = document.createElement("iframe");
-    frame.className = "pdf-viewer-frame";
-    frame.title = pdf.title || "?????????? ????????????";
-    frame.src = pdfUrl;
-    frame.loading = "lazy";
-    viewer.appendChild(frame);
+    const pages = document.createElement("div");
+    pages.className = "pdf-pages";
+    pages.textContent = "Загружаем расписание...";
+    viewer.appendChild(pages);
 
     const fallback = document.createElement("p");
     fallback.className = "pdf-viewer-fallback";
-    fallback.textContent = "???? PDF ?? ???????????? ? ????????, ???????? ??? ? ????? ???????.";
+    fallback.textContent = "Если расписание не отобразилось, откройте PDF в новой вкладке.";
     viewer.appendChild(fallback);
 
     const link = document.createElement("a");
@@ -179,10 +247,20 @@
     link.href = pdfUrl;
     link.target = "_blank";
     link.rel = "noopener";
-    link.textContent = pdf.title || "??????? PDF ?????????? ????????????";
+    link.textContent = pdf.title || "Открыть PDF расписания богослужений";
     viewer.appendChild(link);
 
     target.appendChild(viewer);
+
+    try {
+      if (isImageMedia(pdf)) {
+        renderScheduleImage(pdfUrl, pages, pdf.title);
+      } else {
+        await renderPdfPages(pdfUrl, pages);
+      }
+    } catch (_) {
+      pages.innerHTML = '<p class="empty-public-message">Не удалось показать PDF на странице.</p>';
+    }
   }
   function applyDocuments(media) {
     const documents = media
