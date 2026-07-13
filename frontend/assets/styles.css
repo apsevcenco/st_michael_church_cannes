@@ -161,6 +161,18 @@ a {
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.35));
 }
 
+.lang-switch .lang-disabled {
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: 0.22;
+  transform: none;
+}
+
+.lang-switch .lang-disabled:hover {
+  opacity: 0.22;
+  transform: none;
+}
+
 .hero {
   position: relative;
   min-height: min(760px, calc(100vh - 72px));
@@ -1534,6 +1546,8 @@ main .section li,
 
   .nav-lang-row a:hover { opacity: 0.85; transform: scale(1.12); }
   .nav-lang-row .active { opacity: 1; transform: scale(1.15); filter: drop-shadow(0 1px 4px rgba(0,0,0,0.35)); }
+  .nav-lang-row .lang-disabled,
+  .nav-lang-row .lang-disabled:hover { opacity: 0.22; transform: none; filter: grayscale(1); }
 
   .quick-panel,
   .intro-grid,

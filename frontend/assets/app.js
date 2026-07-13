@@ -1,4 +1,28 @@
 (function () {
+  var currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  var blockedLanguagePage = currentPage === 'fr.html' || currentPage === 'en.html' || /-(fr|en)\.html$/.test(currentPage);
+
+  if (blockedLanguagePage) {
+    window.location.replace('index.html');
+    return;
+  }
+
+  function isBlockedLanguageHref(href) {
+    var page = String(href || '').split('#')[0].split('?')[0].split('/').pop().toLowerCase();
+    return page === 'fr.html' || page === 'en.html' || /-(fr|en)\.html$/.test(page);
+  }
+
+  document.querySelectorAll('.church-lang-switch a').forEach(function (link) {
+    if (!isBlockedLanguageHref(link.getAttribute('href'))) return;
+    link.classList.add('lang-disabled');
+    link.setAttribute('aria-disabled', 'true');
+    link.setAttribute('title', 'Временно недоступно');
+    link.removeAttribute('href');
+    link.addEventListener('click', function (event) {
+      event.preventDefault();
+    });
+  });
+
   // Hero slideshow
   var slides = document.querySelectorAll('.hero-slide');
   if (slides.length >= 2) {
