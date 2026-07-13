@@ -5,73 +5,60 @@
     {
       key: "home",
       title: "Главная",
-      description: "Главный экран, вводный текст, основные фотографии и быстрые ссылки.",
-      blocks: [
-        ["hero", "Верхний экран"],
-        ["body", "Основной текст"],
-        ["notice", "Объявление"]
-      ],
-      media: [
-        ["home_hero", "Фото главной страницы"],
-        ["page_gallery", "Галерея главной"]
-      ]
-    },
-    {
-      key: "history",
-      title: "История",
-      description: "История прихода, исторические фотографии и изображения для галереи.",
-      blocks: [
-        ["hero", "Верхний экран"],
-        ["body", "Полная история"],
-        ["details", "Дополнительный блок"]
-      ],
-      media: [
-        ["history_gallery", "Фото для истории"],
-        ["document", "Исторический документ"]
-      ]
-    },
-    {
-      key: "gallery",
-      title: "Галерея",
-      description: "Отдельная фотогалерея прихода. В этот раздел можно загружать только изображения.",
-      imagesOnly: true,
+      description: "Главная страница. Новости на ней берутся из раздела «Новости».",
       blocks: [
         ["hero", "Верхний экран"],
         ["body", "Вводный текст"]
       ],
-      media: [["gallery", "Фотографии галереи"]]
+      media: []
+    },
+    {
+      key: "history",
+      title: "История",
+      description: "Текст истории храма и фотографии, которые показываются на странице истории.",
+      blocks: [
+        ["hero", "Заголовок страницы"],
+        ["body", "Текст истории"],
+        ["details", "Дополнительный блок"]
+      ],
+      media: [["history_gallery", "Фотографии истории"]],
+      imagesOnly: true
+    },
+    {
+      key: "gallery",
+      title: "Галерея",
+      description: "Отдельная фотогалерея прихода. Здесь загружаются только фотографии.",
+      blocks: [
+        ["hero", "Заголовок страницы"],
+        ["body", "Вводный текст"]
+      ],
+      media: [["gallery", "Фотографии галереи"]],
+      imagesOnly: true
     },
     {
       key: "schedule",
       title: "Богослужения",
-      description: "Текстовое расписание, объявления и PDF-файлы расписаний.",
+      description: "Текст расписания и один PDF-файл расписания, который открывается на странице богослужений.",
       blocks: [
-        ["hero", "Верхний экран"],
-        ["body", "Текст расписания"],
-        ["notice", "Важное объявление"]
+        ["hero", "Заголовок страницы"],
+        ["body", "Текст расписания"]
       ],
-      media: [
-        ["schedule_pdf", "PDF расписания"],
-        ["document", "Документ"]
-      ]
+      media: [["schedule_pdf", "PDF расписания богослужений"]],
+      pdfOnly: true
     },
     {
       key: "sacraments",
       title: "Таинства",
-      description: "Общая страница раздела о таинствах и церковных требах.",
-      blocks: [
-        ["hero", "Верхний экран"],
-        ["body", "Общий текст"],
-        ["details", "Дополнительный блок"]
-      ],
-      media: [["page_gallery", "Фото раздела"]]
+      description: "Общая страница с кнопками перехода к таинствам и требам. Тексты редактируются в отдельных разделах ниже.",
+      blocks: [],
+      media: []
     },
     {
       key: "baptism",
       title: "Крещение",
-      description: "Текст о подготовке к Крещению и необходимые материалы.",
+      description: "Страница Крещения: заголовок, основной текст и порядок подготовки.",
       blocks: [
-        ["hero", "Верхний экран"],
+        ["hero", "Заголовок страницы"],
         ["body", "Основной текст"],
         ["details", "Порядок подготовки"]
       ],
@@ -80,9 +67,9 @@
     {
       key: "wedding",
       title: "Венчание",
-      description: "Текст о Венчании, подготовке и необходимых документах.",
+      description: "Страница Венчания: заголовок, основной текст и порядок подготовки.",
       blocks: [
-        ["hero", "Верхний экран"],
+        ["hero", "Заголовок страницы"],
         ["body", "Основной текст"],
         ["details", "Порядок подготовки"]
       ],
@@ -91,31 +78,31 @@
     {
       key: "confession",
       title: "Исповедь",
-      description: "Полный текст о таинстве Исповеди.",
+      description: "Страница Исповеди: заголовок, основной текст и дополнительные пояснения.",
       blocks: [
-        ["hero", "Верхний экран"],
+        ["hero", "Заголовок страницы"],
         ["body", "Основной текст"],
-        ["details", "Дополнительные факты"]
+        ["details", "Дополнительные пояснения"]
       ],
       media: [["document", "Материал для Исповеди"]]
     },
     {
       key: "communion",
       title: "Причастие",
-      description: "Полный текст о таинстве Причастия.",
+      description: "Страница Причастия: заголовок, основной текст и дополнительные пояснения.",
       blocks: [
-        ["hero", "Верхний экран"],
+        ["hero", "Заголовок страницы"],
         ["body", "Основной текст"],
-        ["details", "Дополнительные факты"]
+        ["details", "Дополнительные пояснения"]
       ],
       media: [["document", "Материал для Причастия"]]
     },
     {
       key: "notes",
       title: "Записки",
-      description: "Тексты о записках, поминовении, правилах подачи имен.",
+      description: "Страница записок: текст о поминовении, правила подачи имен и бланк при необходимости.",
       blocks: [
-        ["hero", "Верхний экран"],
+        ["hero", "Заголовок страницы"],
         ["body", "Основной текст"],
         ["details", "Правила написания"]
       ],
@@ -124,9 +111,9 @@
     {
       key: "meeting",
       title: "Беседа",
-      description: "Запись на беседу со священником и пояснительный текст.",
+      description: "Страница записи на беседу со священником.",
       blocks: [
-        ["hero", "Верхний экран"],
+        ["hero", "Заголовок страницы"],
         ["body", "Основной текст"],
         ["contacts", "Как записаться"]
       ],
@@ -134,53 +121,44 @@
     },
     {
       key: "help",
-      title: "Помощь",
-      description: "Пожертвования, банковские реквизиты, документы и ссылки оплаты.",
+      title: "Помочь храму",
+      description: "Банковские реквизиты, текст онлайн-пожертвования и файл с реквизитами.",
       blocks: [
-        ["hero", "Верхний экран"],
+        ["hero", "Заголовок страницы"],
         ["donation", "Банковские реквизиты"],
         ["details", "Онлайн-пожертвование"]
       ],
-      media: [
-        ["donation_file", "Файл с реквизитами"],
-        ["document", "Документ"]
-      ]
+      media: [["donation_file", "Файл с реквизитами"]]
     },
     {
       key: "contacts",
       title: "Контакты",
-      description: "Адрес, телефон, email, карта и контактный текст.",
+      description: "Адрес, телефон, email, карта и маршрут.",
       blocks: [
-        ["hero", "Верхний экран"],
+        ["hero", "Заголовок страницы"],
         ["contacts", "Контактные данные"],
         ["details", "Карта и маршрут"]
       ],
-      media: [["document", "Документ"]]
+      media: []
     },
     {
       key: "visit",
       title: "Посетителям",
-      description: "Адрес, правила посещения, маршрут и информация для гостей.",
+      description: "Информация для гостей храма: как добраться и как подготовиться к посещению.",
       blocks: [
-        ["hero", "Верхний экран"],
+        ["hero", "Заголовок страницы"],
         ["body", "Основной текст"],
         ["details", "Правила посещения"]
       ],
-      media: [["document", "Документ"]]
+      media: []
     },
     {
       key: "news",
       title: "Новости",
-      description: "Приходские новости, объявления и изображения.",
-      blocks: [
-        ["hero", "Верхний экран"],
-        ["body", "Новость или объявление"],
-        ["notice", "Важная новость"]
-      ],
-      media: [
-        ["page_gallery", "Фото новости"],
-        ["document", "Документ"]
-      ]
+      description: "Календарные новости прихода с датой, текстом и фотографиями. Последние три показываются на главной.",
+      blocks: [],
+      media: [],
+      newsManager: true
     }
   ];
 
@@ -194,6 +172,12 @@
   let newsPhotos = [];
 
   const $ = (id) => document.getElementById(id);
+
+  const hasContentEditor = () => Array.isArray(activeSection.blocks) && activeSection.blocks.length > 0;
+  const hasMediaEditor = () => Array.isArray(activeSection.media) && activeSection.media.length > 0;
+  const isPdfFile = (file) => {
+    return file && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
+  };
 
   const contentFields = {
     id: $("content-id"),
@@ -293,8 +277,11 @@
   }
 
   function renderBlockTabs() {
+    const panel = $("content-panel");
     const tabs = $("content-block-tabs");
+    if (panel) panel.hidden = !hasContentEditor();
     tabs.innerHTML = "";
+    if (!hasContentEditor()) return;
     activeSection.blocks.forEach(([key, label]) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -306,16 +293,22 @@
   }
 
   function renderMediaPurposes() {
+    const panel = $("media-panel");
+    if (panel) panel.hidden = !hasMediaEditor();
     mediaFields.purpose.innerHTML = "";
+    if (!hasMediaEditor()) {
+      mediaFields.file.accept = "";
+      mediaFields.file.multiple = false;
+      return;
+    }
     activeSection.media.forEach(([key, label]) => {
       const option = document.createElement("option");
       option.value = key;
       option.textContent = label;
       mediaFields.purpose.appendChild(option);
     });
-    mediaFields.file.accept = activeSection.imagesOnly ? "image/*" : "image/*,.pdf,.doc,.docx,.xls,.xlsx";
+    mediaFields.file.accept = activeSection.pdfOnly ? ".pdf,application/pdf" : activeSection.imagesOnly ? "image/*" : "image/*,.pdf,.doc,.docx,.xls,.xlsx";
     mediaFields.file.multiple = Boolean(activeSection.imagesOnly);
-    $("media-panel").hidden = activeSection.media.length === 0;
   }
 
   function renderLanguageButtons() {
@@ -329,12 +322,14 @@
     setText("section-title", activeSection.title);
     setText("section-description", activeSection.description);
     const newsPanel = $("news-admin-panel");
-    if (newsPanel) newsPanel.hidden = activeSection.key !== "news";
+    if (newsPanel) newsPanel.hidden = !activeSection.newsManager;
+    const editorGrid = document.querySelector(".admin-editor-grid");
+    if (editorGrid) editorGrid.hidden = !hasContentEditor() && !hasMediaEditor();
   }
 
   function selectSection(key) {
     activeSection = sections.find((section) => section.key === key) || sections[0];
-    activeBlock = activeSection.blocks[0][0];
+    activeBlock = hasContentEditor() ? activeSection.blocks[0][0] : "";
     clearContentForm();
     clearMediaForm();
     renderSectionMenu();
@@ -345,6 +340,7 @@
   }
 
   function selectBlock(key) {
+    if (!hasContentEditor()) return;
     activeBlock = key;
     clearContentForm();
     renderBlockTabs();
@@ -354,8 +350,10 @@
   function selectLanguage(language) {
     activeLanguage = language;
     clearContentForm();
+    clearNewsForm();
     renderLanguageButtons();
-    loadContentRecords();
+    if (hasContentEditor()) loadContentRecords();
+    if (activeSection.newsManager) loadNewsRecords();
   }
 
   async function loadSectionData() {
@@ -365,8 +363,19 @@
     renderBlockTabs();
     renderMediaPurposes();
     renderLanguageButtons();
-    await Promise.all([loadContentRecords(), loadMediaRecords()]);
-    if (activeSection.key === "news") await loadNewsRecords();
+    const jobs = [];
+    if (hasContentEditor()) jobs.push(loadContentRecords());
+    else {
+      contentRecords = [];
+      renderContentRecords();
+    }
+    if (hasMediaEditor()) jobs.push(loadMediaRecords());
+    else {
+      mediaRecords = [];
+      renderMediaRecords();
+    }
+    await Promise.all(jobs);
+    if (activeSection.newsManager) await loadNewsRecords();
   }
 
   function contentPayload() {
@@ -378,7 +387,7 @@
       summary: contentFields.summary.value.trim(),
       body: contentFields.body.value.trim(),
       status: contentFields.status.value,
-      sort_order: activeSection.blocks.findIndex(([key]) => key === activeBlock),
+      sort_order: hasContentEditor() ? activeSection.blocks.findIndex(([key]) => key === activeBlock) : 0,
       updated_at: new Date().toISOString()
     };
   }
@@ -407,7 +416,11 @@
   }
 
   async function loadContentRecords() {
-    if (!client) return;
+    if (!client || !hasContentEditor()) {
+      contentRecords = [];
+      renderContentRecords();
+      return;
+    }
     const { data, error } = await client
       .from("content_sections")
       .select("*")
@@ -430,6 +443,7 @@
 
   function renderContentRecords() {
     const list = $("content-list");
+    if (!list || !hasContentEditor()) return;
     list.innerHTML = "";
 
     if (!contentRecords.length) {
@@ -454,7 +468,7 @@
 
   async function saveContent(event) {
     event.preventDefault();
-    if (!client) return;
+    if (!client || !hasContentEditor()) return;
 
     const existing = contentRecords.find((item) => item.section_key === activeBlock);
     const id = contentFields.id.value || (existing && existing.id);
@@ -517,7 +531,7 @@
 
   function fillMediaForm(record) {
     mediaFields.id.value = record.id || "";
-    mediaFields.purpose.value = record.purpose || activeSection.media[0][0];
+    mediaFields.purpose.value = record.purpose || (hasMediaEditor() ? activeSection.media[0][0] : "");
     mediaFields.file.value = "";
     mediaFields.title.value = record.title || "";
     mediaFields.description.value = record.description || "";
@@ -528,7 +542,7 @@
   }
 
   async function loadMediaRecords() {
-    if (!client || !activeSection.media.length) {
+    if (!client || !hasMediaEditor()) {
       mediaRecords = [];
       renderMediaRecords();
       return;
@@ -578,7 +592,7 @@
 
   async function saveMedia(event) {
     event.preventDefault();
-    if (!client) return;
+    if (!client || !hasMediaEditor()) return;
 
     const files = Array.from(mediaFields.file.files || []);
     const file = files[0];
@@ -635,6 +649,10 @@
     if (file) {
       if (activeSection.imagesOnly && !file.type.startsWith("image/")) {
         setText("editor-status", "В раздел «Галерея» можно загружать только фотографии.");
+        return;
+      }
+      if (activeSection.pdfOnly && !isPdfFile(file)) {
+        setText("editor-status", "В расписание можно загрузить только PDF-файл.");
         return;
       }
 

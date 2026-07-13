@@ -113,7 +113,7 @@
     link.href = pdf.file_url;
     link.target = "_blank";
     link.rel = "noopener";
-    link.textContent = pdf.title || "Открыть PDF расписания";
+    link.textContent = pdf.title || "Открыть PDF расписания богослужений";
     target.appendChild(link);
   }
 
