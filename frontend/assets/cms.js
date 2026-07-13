@@ -36,6 +36,19 @@
       .join("");
   }
 
+  function formatDate(value, language) {
+    if (!value) return "";
+    try {
+      return new Intl.DateTimeFormat(language === "en" ? "en-GB" : language === "fr" ? "fr-FR" : "ru-RU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }).format(new Date(`${value}T00:00:00`));
+    } catch (_) {
+      return value;
+    }
+  }
+
   function applyHero(record) {
     const hero = document.querySelector(".page-hero");
     if (!hero || !record) return;
@@ -154,6 +167,106 @@
     `).join("");
   }
 
+  function groupPhotos(photos) {
+    return (photos || []).reduce((groups, photo) => {
+      const key = photo.news_id;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(photo);
+      return groups;
+    }, {});
+  }
+
+  function renderNewsCard(item, photos, language) {
+    const firstPhoto = photos[0];
+    return `
+      <article class="news-card">
+        ${firstPhoto ? `<img class="news-card-image" src="${firstPhoto.file_url}" alt="${escapeHtml(firstPhoto.description || item.title)}">` : ""}
+        <time>${escapeHtml(formatDate(item.event_date, language))}</time>
+        <h3>${escapeHtml(item.title)}</h3>
+        ${item.excerpt ? `<p>${escapeHtml(item.excerpt)}</p>` : ""}
+        ${item.body ? `<details><summary>${language === "fr" ? "Lire la suite" : language === "en" ? "Read more" : "Читать полностью"}</summary>${paragraphsToHtml(item.body)}</details>` : ""}
+        ${photos.length > 1 ? `<div class="news-photo-strip">${photos.map((photo) => `<img src="${photo.file_url}" alt="${escapeHtml(photo.description || item.title)}">`).join("")}</div>` : ""}
+      </article>
+    `;
+  }
+
+  async function loadNews(client, language) {
+    const hasHomeNews = document.querySelector("[data-home-news]");
+    const hasNewsList = document.querySelector("[data-news-list]");
+    if (!hasHomeNews && !hasNewsList) return;
+
+    const [{ data: news }, { data: photos }] = await Promise.all([
+      client
+        .from("parish_news")
+        .select("*")
+        .eq("language", language)
+        .eq("status", "published")
+        .order("event_date", { ascending: false })
+        .order("sort_order", { ascending: true }),
+      client
+        .from("parish_news_photos")
+        .select("*")
+        .order("sort_order", { ascending: true })
+    ]);
+
+    const items = news || [];
+    const photosByNews = groupPhotos(photos || []);
+
+    if (hasHomeNews) {
+      hasHomeNews.innerHTML = items.slice(0, 3).map((item) => renderNewsCard(item, photosByNews[item.id] || [], language)).join("");
+    }
+
+    if (hasNewsList) {
+      if (!items.length) {
+        hasNewsList.innerHTML = `<p class="empty-public-message">${language === "fr" ? "Les nouvelles seront publiées prochainement." : language === "en" ? "News will be published soon." : "Новости будут опубликованы в ближайшее время."}</p>`;
+      } else {
+        hasNewsList.innerHTML = items.map((item) => renderNewsCard(item, photosByNews[item.id] || [], language)).join("");
+      }
+    }
+  }
+
+  function setupLightbox() {
+    const images = Array.from(document.querySelectorAll(".photo-gallery img, .news-photo-strip img, .news-card-image"));
+    if (!images.length || document.querySelector(".lightbox")) return;
+
+    let index = 0;
+    const overlay = document.createElement("div");
+    overlay.className = "lightbox";
+    overlay.innerHTML = `
+      <button class="lightbox-close" type="button" aria-label="Close">×</button>
+      <button class="lightbox-prev" type="button" aria-label="Previous">‹</button>
+      <img alt="">
+      <button class="lightbox-next" type="button" aria-label="Next">›</button>
+    `;
+    document.body.appendChild(overlay);
+
+    const lightboxImage = overlay.querySelector("img");
+    const show = (nextIndex) => {
+      index = (nextIndex + images.length) % images.length;
+      lightboxImage.src = images[index].src;
+      lightboxImage.alt = images[index].alt || "";
+      overlay.classList.add("is-open");
+    };
+
+    images.forEach((image, imageIndex) => {
+      image.addEventListener("click", () => show(imageIndex));
+      image.closest("figure")?.classList.add("is-clickable");
+    });
+
+    overlay.querySelector(".lightbox-close").addEventListener("click", () => overlay.classList.remove("is-open"));
+    overlay.querySelector(".lightbox-prev").addEventListener("click", () => show(index - 1));
+    overlay.querySelector(".lightbox-next").addEventListener("click", () => show(index + 1));
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) overlay.classList.remove("is-open");
+    });
+    document.addEventListener("keydown", (event) => {
+      if (!overlay.classList.contains("is-open")) return;
+      if (event.key === "Escape") overlay.classList.remove("is-open");
+      if (event.key === "ArrowLeft") show(index - 1);
+      if (event.key === "ArrowRight") show(index + 1);
+    });
+  }
+
   async function loadCms() {
     if (!window.supabase || !window.ST_MICHAEL_SUPABASE_URL || !window.ST_MICHAEL_SUPABASE_ANON_KEY) return;
 
@@ -187,6 +300,8 @@
     applySchedulePdf(mediaFiles);
     applyDocuments(mediaFiles);
     applyGallery(mediaFiles);
+    await loadNews(client, language);
+    setupLightbox();
   }
 
   document.addEventListener("DOMContentLoaded", loadCms);

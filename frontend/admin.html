@@ -108,6 +108,32 @@
               </article>
             </div>
 
+            <article class="admin-panel" id="news-admin-panel" hidden>
+              <h2>Новости прихода</h2>
+              <form class="admin-form" id="news-form">
+                <input id="news-id" type="hidden">
+                <div class="admin-grid-two">
+                  <label>Дата новости<input id="news-date" type="date" required></label>
+                  <label>Статус
+                    <select id="news-status">
+                      <option value="published">Опубликовано</option>
+                      <option value="draft">Черновик</option>
+                    </select>
+                  </label>
+                </div>
+                <label>Заголовок<input id="news-title" type="text" required></label>
+                <label>Краткий текст<textarea id="news-excerpt"></textarea></label>
+                <label>Полный текст<textarea id="news-body" class="admin-large-textarea"></textarea></label>
+                <label>Фотографии<input id="news-photos" type="file" accept="image/*" multiple></label>
+                <div class="admin-actions">
+                  <button class="primary" type="submit">Сохранить новость</button>
+                  <button type="button" id="clear-news-button">Новая новость</button>
+                  <button type="button" id="delete-news-button">Удалить новость</button>
+                </div>
+              </form>
+              <div class="admin-list" id="news-list"></div>
+            </article>
+
             <p class="admin-status" id="editor-status">Готово к работе.</p>
           </section>
         </div>

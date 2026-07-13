@@ -190,6 +190,8 @@
   let activeBlock = "hero";
   let contentRecords = [];
   let mediaRecords = [];
+  let newsRecords = [];
+  let newsPhotos = [];
 
   const $ = (id) => document.getElementById(id);
 
@@ -210,6 +212,16 @@
     description: $("media-description"),
     sort: $("media-sort"),
     status: $("media-status")
+  };
+
+  const newsFields = {
+    id: $("news-id"),
+    date: $("news-date"),
+    title: $("news-title"),
+    excerpt: $("news-excerpt"),
+    body: $("news-body"),
+    status: $("news-status"),
+    photos: $("news-photos")
   };
 
   function setText(id, text) {
@@ -302,6 +314,7 @@
       mediaFields.purpose.appendChild(option);
     });
     mediaFields.file.accept = activeSection.imagesOnly ? "image/*" : "image/*,.pdf,.doc,.docx,.xls,.xlsx";
+    mediaFields.file.multiple = Boolean(activeSection.imagesOnly);
     $("media-panel").hidden = activeSection.media.length === 0;
   }
 
@@ -315,6 +328,8 @@
     setText("section-kicker", "Раздел сайта");
     setText("section-title", activeSection.title);
     setText("section-description", activeSection.description);
+    const newsPanel = $("news-admin-panel");
+    if (newsPanel) newsPanel.hidden = activeSection.key !== "news";
   }
 
   function selectSection(key) {
@@ -351,6 +366,7 @@
     renderMediaPurposes();
     renderLanguageButtons();
     await Promise.all([loadContentRecords(), loadMediaRecords()]);
+    if (activeSection.key === "news") await loadNewsRecords();
   }
 
   function contentPayload() {
@@ -496,6 +512,7 @@
     mediaFields.description.value = "";
     mediaFields.sort.value = "0";
     mediaFields.status.value = "published";
+    renderMediaRecords();
   }
 
   function fillMediaForm(record) {
@@ -506,6 +523,8 @@
     mediaFields.description.value = record.description || "";
     mediaFields.sort.value = record.sort_order || 0;
     mediaFields.status.value = record.status || "published";
+    renderMediaRecords();
+    setText("editor-status", `Выбрано: ${record.title || record.file_name || "фото/файл"}.`);
   }
 
   async function loadMediaRecords() {
@@ -547,7 +566,7 @@
       const label = (activeSection.media.find(([key]) => key === record.purpose) || [record.purpose, record.purpose])[1];
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "admin-row admin-media-row";
+      button.className = `admin-row admin-media-row${record.id === mediaFields.id.value ? " is-selected" : ""}`;
       const preview = record.mime_type && record.mime_type.startsWith("image/") && record.file_url
         ? `<img src="${escapeHtml(record.file_url)}" alt="">`
         : `<span class="admin-file-chip">${escapeHtml(record.mime_type || "file")}</span>`;
@@ -561,10 +580,57 @@
     event.preventDefault();
     if (!client) return;
 
-    const file = mediaFields.file.files[0];
+    const files = Array.from(mediaFields.file.files || []);
+    const file = files[0];
     const current = mediaRecords.find((record) => record.id === mediaFields.id.value);
     let publicUrl = current ? current.file_url : "";
     let storagePath = current ? current.storage_path : "";
+
+    if (activeSection.imagesOnly && !mediaFields.id.value && files.length > 1) {
+      const startSort = Number(mediaFields.sort.value || mediaRecords.length || 0);
+      const rows = [];
+      for (const [index, uploadFile] of files.entries()) {
+        if (!uploadFile.type.startsWith("image/")) {
+          setText("editor-status", "В раздел «Галерея» можно загружать только фотографии.");
+          return;
+        }
+        const extension = uploadFile.name.includes(".") ? uploadFile.name.split(".").pop() : "jpg";
+        const safeName = slugify(uploadFile.name.replace(/\.[^.]+$/, ""));
+        const path = `${activeSection.key}/${mediaFields.purpose.value}/${Date.now()}-${index}-${safeName}.${extension}`;
+        const { error: uploadError } = await client.storage.from(MEDIA_BUCKET).upload(path, uploadFile, {
+          cacheControl: "3600",
+          upsert: false
+        });
+        if (uploadError) {
+          setText("editor-status", `Ошибка загрузки файла: ${uploadError.message}`);
+          return;
+        }
+        const { data } = client.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+        rows.push({
+          page_key: activeSection.key,
+          purpose: mediaFields.purpose.value,
+          title: mediaFields.title.value.trim() || uploadFile.name,
+          description: mediaFields.description.value.trim(),
+          file_url: data.publicUrl,
+          storage_path: path,
+          file_name: uploadFile.name,
+          mime_type: uploadFile.type,
+          file_size: uploadFile.size,
+          status: mediaFields.status.value,
+          sort_order: startSort + index,
+          updated_at: new Date().toISOString()
+        });
+      }
+      const { error } = await client.from("media_files").insert(rows);
+      if (error) {
+        setText("editor-status", `Ошибка сохранения файлов: ${error.message}`);
+        return;
+      }
+      clearMediaForm();
+      await loadMediaRecords();
+      setText("editor-status", `Загружено фотографий: ${rows.length}.`);
+      return;
+    }
 
     if (file) {
       if (activeSection.imagesOnly && !file.type.startsWith("image/")) {
@@ -639,6 +705,194 @@
     setText("editor-status", `Файл удалён из сайта.${storageWarning}`);
   }
 
+  function clearNewsForm() {
+    if (!newsFields.id) return;
+    newsFields.id.value = "";
+    newsFields.date.value = new Date().toISOString().slice(0, 10);
+    newsFields.title.value = "";
+    newsFields.excerpt.value = "";
+    newsFields.body.value = "";
+    newsFields.status.value = "published";
+    newsFields.photos.value = "";
+    renderNewsRecords();
+  }
+
+  function fillNewsForm(record) {
+    newsFields.id.value = record.id || "";
+    newsFields.date.value = record.event_date || new Date().toISOString().slice(0, 10);
+    newsFields.title.value = record.title || "";
+    newsFields.excerpt.value = record.excerpt || "";
+    newsFields.body.value = record.body || "";
+    newsFields.status.value = record.status || "published";
+    newsFields.photos.value = "";
+    renderNewsRecords();
+    setText("editor-status", `Выбрана новость: ${record.title}.`);
+  }
+
+  function newsPayload() {
+    return {
+      language: activeLanguage,
+      title: newsFields.title.value.trim(),
+      excerpt: newsFields.excerpt.value.trim(),
+      body: newsFields.body.value.trim(),
+      event_date: newsFields.date.value,
+      status: newsFields.status.value,
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  async function loadNewsRecords() {
+    if (!client || activeSection.key !== "news") return;
+    const [{ data: news, error }, { data: photos }] = await Promise.all([
+      client
+        .from("parish_news")
+        .select("*")
+        .eq("language", activeLanguage)
+        .order("event_date", { ascending: false }),
+      client
+        .from("parish_news_photos")
+        .select("*")
+        .order("sort_order", { ascending: true })
+    ]);
+
+    if (error) {
+      newsRecords = [];
+      newsPhotos = [];
+      renderNewsRecords();
+      setText("editor-status", `Ошибка чтения новостей: ${error.message}`);
+      return;
+    }
+
+    newsRecords = news || [];
+    newsPhotos = photos || [];
+    renderNewsRecords();
+    if (!newsFields.id.value) clearNewsForm();
+  }
+
+  function renderNewsRecords() {
+    const list = $("news-list");
+    if (!list) return;
+    list.innerHTML = "";
+
+    if (!newsRecords.length) {
+      list.innerHTML = '<div class="admin-empty">Новостей пока нет.</div>';
+      return;
+    }
+
+    newsRecords.forEach((record) => {
+      const count = newsPhotos.filter((photo) => photo.news_id === record.id).length;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `admin-row${record.id === newsFields.id.value ? " is-selected" : ""}`;
+      button.innerHTML = `<strong>${escapeHtml(record.title)}</strong><br><span>${escapeHtml(record.event_date)} · ${escapeHtml(record.status)} · фото: ${count}</span>`;
+      button.addEventListener("click", () => fillNewsForm(record));
+      list.appendChild(button);
+    });
+  }
+
+  async function uploadNewsPhotos(newsId) {
+    const files = Array.from(newsFields.photos.files || []);
+    if (!files.length) return true;
+
+    const rows = [];
+    for (const [index, file] of files.entries()) {
+      if (!file.type.startsWith("image/")) {
+        setText("editor-status", "К новости можно загружать только фотографии.");
+        return false;
+      }
+      const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
+      const safeName = slugify(file.name.replace(/\.[^.]+$/, ""));
+      const path = `news/${newsId}/${Date.now()}-${index}-${safeName}.${extension}`;
+      const { error: uploadError } = await client.storage.from(MEDIA_BUCKET).upload(path, file, {
+        cacheControl: "3600",
+        upsert: false
+      });
+      if (uploadError) {
+        setText("editor-status", `Ошибка загрузки фото новости: ${uploadError.message}`);
+        return false;
+      }
+      const { data } = client.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+      rows.push({
+        news_id: newsId,
+        title: file.name,
+        file_url: data.publicUrl,
+        storage_path: path,
+        file_name: file.name,
+        mime_type: file.type,
+        file_size: file.size,
+        sort_order: index
+      });
+    }
+
+    const { error } = await client.from("parish_news_photos").insert(rows);
+    if (error) {
+      setText("editor-status", `Ошибка сохранения фото новости: ${error.message}`);
+      return false;
+    }
+    return true;
+  }
+
+  async function saveNews(event) {
+    event.preventDefault();
+    if (!client || activeSection.key !== "news") return;
+
+    const payload = newsPayload();
+    if (!payload.title || !payload.event_date) {
+      setText("editor-status", "У новости должны быть дата и заголовок.");
+      return;
+    }
+
+    let id = newsFields.id.value;
+    if (id) {
+      const { error } = await client.from("parish_news").update(payload).eq("id", id);
+      if (error) {
+        setText("editor-status", `Ошибка сохранения новости: ${error.message}`);
+        return;
+      }
+    } else {
+      const { data, error } = await client.from("parish_news").insert(payload).select("id").single();
+      if (error) {
+        setText("editor-status", `Ошибка создания новости: ${error.message}`);
+        return;
+      }
+      id = data.id;
+      newsFields.id.value = id;
+    }
+
+    const photosOk = await uploadNewsPhotos(id);
+    if (!photosOk) return;
+
+    await loadNewsRecords();
+    clearNewsForm();
+    setText("editor-status", "Новость сохранена.");
+  }
+
+  async function deleteNews() {
+    const id = newsFields.id.value;
+    if (!client || !id) {
+      setText("editor-status", "Сначала выберите новость в списке.");
+      return;
+    }
+
+    const record = newsRecords.find((item) => item.id === id);
+    if (!window.confirm(`Удалить новость «${record ? record.title : ""}»?`)) return;
+
+    const photos = newsPhotos.filter((photo) => photo.news_id === id && photo.storage_path);
+    if (photos.length) {
+      await client.storage.from(MEDIA_BUCKET).remove(photos.map((photo) => photo.storage_path));
+    }
+
+    const { error } = await client.from("parish_news").delete().eq("id", id);
+    if (error) {
+      setText("editor-status", `Ошибка удаления новости: ${error.message}`);
+      return;
+    }
+
+    clearNewsForm();
+    await loadNewsRecords();
+    setText("editor-status", "Новость удалена.");
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     if (!connect()) return;
 
@@ -679,5 +933,9 @@
     $("media-form").addEventListener("submit", saveMedia);
     $("clear-media-button").addEventListener("click", clearMediaForm);
     $("delete-media-button").addEventListener("click", deleteMedia);
+
+    $("news-form").addEventListener("submit", saveNews);
+    $("clear-news-button").addEventListener("click", clearNewsForm);
+    $("delete-news-button").addEventListener("click", deleteNews);
   });
 })();
