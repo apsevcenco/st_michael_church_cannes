@@ -543,6 +543,22 @@ h3 {
   text-decoration: none;
 }
 
+.sacrament-subnav .disabled {
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.52);
+  border: 3px double var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  cursor: not-allowed;
+  font-family: "Oglavie", Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 2vw, 30px);
+  line-height: 1;
+  opacity: 0.58;
+}
+
 .sacrament-subnav a.active {
   background: var(--gold);
   border-color: var(--gold-dark);
@@ -568,6 +584,20 @@ h3 {
 
 .info-card h2 {
   font-size: clamp(28px, 3vw, 40px);
+}
+
+.info-card.disabled-card {
+  background: rgba(255, 255, 255, 0.52);
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+[data-cms-body]:empty,
+[data-cms-extra]:empty,
+[data-cms-gallery]:empty,
+.cms-documents:empty {
+  display: none;
 }
 
 .admin-page {

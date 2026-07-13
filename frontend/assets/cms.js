@@ -40,7 +40,7 @@
     const hero = document.querySelector(".page-hero");
     if (!hero || !record) return;
     const h1 = hero.querySelector("h1");
-    const text = hero.querySelector("p:last-child");
+    const text = hero.querySelector("p:not(.section-label)");
     if (h1 && record.title) h1.textContent = record.title;
     if (text && record.summary) text.textContent = record.summary;
   }
