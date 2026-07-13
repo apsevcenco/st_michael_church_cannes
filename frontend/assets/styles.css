@@ -1786,6 +1786,10 @@ main .section li,
     padding: 28px 18px 44px;
   }
 
+  .hero-overlay::before {
+    display: none;
+  }
+
   .hero-copy {
     font-size: 18px;
   }
