@@ -31,6 +31,17 @@
       ]
     },
     {
+      key: "gallery",
+      title: "Галерея",
+      description: "Отдельная фотогалерея прихода. В этот раздел можно загружать только изображения.",
+      imagesOnly: true,
+      blocks: [
+        ["hero", "Верхний экран"],
+        ["body", "Вводный текст"]
+      ],
+      media: [["gallery", "Фотографии галереи"]]
+    },
+    {
       key: "schedule",
       title: "Богослужения",
       description: "Текстовое расписание, объявления и PDF-файлы расписаний.",
@@ -291,6 +302,7 @@
       option.textContent = label;
       mediaFields.purpose.appendChild(option);
     });
+    mediaFields.file.accept = activeSection.imagesOnly ? "image/*" : "image/*,.pdf,.doc,.docx,.xls,.xlsx";
     $("media-panel").hidden = activeSection.media.length === 0;
   }
 
@@ -556,6 +568,11 @@
     let storagePath = current ? current.storage_path : "";
 
     if (file) {
+      if (activeSection.imagesOnly && !file.type.startsWith("image/")) {
+        setText("editor-status", "В раздел «Галерея» можно загружать только фотографии.");
+        return;
+      }
+
       const extension = file.name.includes(".") ? file.name.split(".").pop() : "bin";
       const safeName = slugify(file.name.replace(/\.[^.]+$/, ""));
       storagePath = `${activeSection.key}/${mediaFields.purpose.value}/${Date.now()}-${safeName}.${extension}`;
@@ -596,11 +613,20 @@
 
   async function deleteMedia() {
     const id = mediaFields.id.value;
-    if (!client || !id) return;
+    if (!client) return;
+    if (!id) {
+      setText("editor-status", "Сначала выберите фото или файл в списке ниже.");
+      return;
+    }
 
     const record = mediaRecords.find((item) => item.id === id);
+    const name = record ? (record.title || record.file_name || "этот файл") : "этот файл";
+    if (!window.confirm(`Удалить «${name}»?`)) return;
+
+    let storageWarning = "";
     if (record && record.storage_path) {
-      await client.storage.from(MEDIA_BUCKET).remove([record.storage_path]);
+      const { error: storageError } = await client.storage.from(MEDIA_BUCKET).remove([record.storage_path]);
+      if (storageError) storageWarning = ` Файл в хранилище не удалён: ${storageError.message}`;
     }
 
     const { error } = await client.from("media_files").delete().eq("id", id);
@@ -611,7 +637,7 @@
 
     clearMediaForm();
     await loadMediaRecords();
-    setText("editor-status", "Файл удален.");
+    setText("editor-status", `Файл удалён из сайта.${storageWarning}`);
   }
 
   document.addEventListener("DOMContentLoaded", () => {

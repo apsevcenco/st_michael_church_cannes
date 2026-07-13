@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Galerie</title>
+    <meta name="description" content="Galerie photo de la paroisse Saint-Michel-Archange à Cannes.">
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/site-config.js"></script>
+    <script defer src="assets/cms.js"></script>
+    <script defer src="assets/app.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="fr.html" aria-label="Accueil">
+        <span class="brand-mark"><img src="assets/logo.jpg" alt="Saint Michel Archange"></span>
+        <span><strong>Église Saint-Michel-Archange</strong><small>paroisse orthodoxe à Cannes</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Navigation"><a href="schedule-fr.html">Offices</a><a href="sacraments-fr.html">Sacrements</a><a href="history-fr.html">Histoire</a><a class="active" href="gallery-fr.html">Galerie</a><a href="visit-fr.html">Visiter</a><a href="help-fr.html">Aider</a><a href="contacts-fr.html">Contacts</a></nav>
+      <div class="lang-switch church-lang-switch" aria-label="Languages"><a href="gallery.html">&#127479;&#127482;</a><a class="active" href="gallery-fr.html">&#127467;&#127479;</a><a href="gallery-en.html">&#127468;&#127463;</a></div>
+    </header>
+    <main>
+      <section class="page-hero"><p class="section-label">Photos</p><h1>Galerie</h1></section>
+      <section class="section gallery-intro" data-cms-body></section>
+      <section class="section"><div class="photo-gallery" data-cms-gallery></div></section>
+    </main>
+    <footer class="site-footer"><p>© Église Saint-Michel-Archange à Cannes</p><p><a href="fr.html">Accueil</a></p></footer>
+  </body>
+</html>
