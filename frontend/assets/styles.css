@@ -1652,7 +1652,7 @@ main .section li,
   .brand {
     gap: 10px;
     min-width: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .brand > span:last-child {
