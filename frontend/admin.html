@@ -135,6 +135,28 @@
             </article>
 
             <p class="admin-status" id="editor-status">Готово к работе.</p>
+            <article class="admin-panel" id="stats-admin-panel" hidden>
+              <div class="stats-header">
+                <h2>Статистика посещений</h2>
+                <button type="button" id="refresh-stats-button">Обновить</button>
+              </div>
+              <div class="stats-grid">
+                <div class="stats-card"><span>Сегодня</span><strong id="stats-today">0</strong></div>
+                <div class="stats-card"><span>30 дней</span><strong id="stats-total">0</strong></div>
+                <div class="stats-card"><span>Уникальные</span><strong id="stats-unique">0</strong></div>
+                <div class="stats-card"><span>Страниц</span><strong id="stats-pages">0</strong></div>
+              </div>
+              <div class="stats-columns">
+                <section>
+                  <h3>Популярные страницы</h3>
+                  <div class="stats-table" id="stats-top-pages"></div>
+                </section>
+                <section>
+                  <h3>Последние посещения</h3>
+                  <div class="stats-table" id="stats-recent"></div>
+                </section>
+              </div>
+            </article>
           </section>
         </div>
       </section>

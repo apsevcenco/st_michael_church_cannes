@@ -39,6 +39,39 @@
     }
   }
 
+  function visitorSessionId() {
+    const key = "st_michael_visit_session";
+    let value = "";
+    try {
+      value = window.localStorage.getItem(key) || "";
+      if (!value) {
+        value = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+        window.localStorage.setItem(key, value);
+      }
+    } catch (_) {
+      value = "";
+    }
+    return value;
+  }
+
+  async function trackVisit(client, pageKey, language) {
+    const file = window.location.pathname.split("/").pop() || "index.html";
+    if (file === "admin.html") return;
+
+    try {
+      await client.from("page_visits").insert({
+        page_key: pageKey,
+        page_path: window.location.pathname,
+        language,
+        session_id: visitorSessionId(),
+        referrer: document.referrer ? document.referrer.slice(0, 500) : "",
+        user_agent: navigator.userAgent ? navigator.userAgent.slice(0, 500) : ""
+      });
+    } catch (_) {
+      // Statistics must never block public page rendering.
+    }
+  }
+
   function paragraphsToHtml(text) {
     return String(text || "")
       .split(/\n{2,}/)
@@ -293,6 +326,7 @@
     const pageKey = pageKeyFromLocation();
     const language = languageFromLocation();
     const client = window.supabase.createClient(window.ST_MICHAEL_SUPABASE_URL, window.ST_MICHAEL_SUPABASE_ANON_KEY);
+    trackVisit(client, pageKey, language);
 
     const [{ data: sections }, { data: media }] = await Promise.all([
       client
