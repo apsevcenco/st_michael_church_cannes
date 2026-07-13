@@ -50,12 +50,24 @@
     const target =
       document.querySelector("[data-cms-body]") ||
       document.querySelector(".history-article") ||
-      document.querySelector(".section.two-columns > div:first-child") ||
-      document.querySelector("main .section:not(.page-hero)");
+      document.querySelector(".section.two-columns > div:first-child");
 
     if (!target) return;
     const title = record.title ? `<h2>${escapeHtml(record.title)}</h2>` : "";
     target.innerHTML = `${title}${paragraphsToHtml(record.body)}`;
+  }
+
+  function applyNamedBlocks(records) {
+    document.querySelectorAll("[data-cms-section]").forEach((target) => {
+      const key = target.getAttribute("data-cms-section");
+      const record = records.find((item) => item.section_key === key);
+      if (!record) return;
+
+      const title = target.querySelector("[data-cms-title]");
+      const body = target.querySelector("[data-cms-text]");
+      if (title && record.title) title.textContent = record.title;
+      if (body && record.body) body.innerHTML = paragraphsToHtml(record.body);
+    });
   }
 
   function applyExtraBlocks(records) {
@@ -168,6 +180,7 @@
     const content = sections || [];
     applyHero(content.find((item) => item.section_key === "hero"));
     applyBody(content.find((item) => item.section_key === "body"));
+    applyNamedBlocks(content);
     applyExtraBlocks(content);
 
     const mediaFiles = media || [];

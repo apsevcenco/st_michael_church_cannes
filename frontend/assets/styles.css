@@ -586,6 +586,12 @@ h3 {
   font-size: clamp(28px, 3vw, 40px);
 }
 
+.cards-grid .info-card {
+  min-height: 128px;
+  display: grid;
+  align-items: center;
+}
+
 .info-card.disabled-card {
   background: rgba(255, 255, 255, 0.52);
   color: var(--muted);
@@ -1105,6 +1111,26 @@ h3 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+.bank-details {
+  min-height: 120px;
+  white-space: pre-wrap;
+}
+
+.disabled-donation-button {
+  margin-top: 18px;
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+main .section p,
+main .section li,
+.bank-details,
+.history-article,
+.sacrament-article {
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .cms-documents:empty {
