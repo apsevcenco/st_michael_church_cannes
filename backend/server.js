@@ -4,27 +4,12 @@ const PORT = Number(process.env.PORT || 10000);
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
 
 const siteInfo = {
-  parish: "Parish of Archangel Michael in Cannes",
+  parish: "Parish of St Michael the Archangel in Cannes",
   city: "Cannes",
   address: "40 boulevard Alexandre III, 06400 Cannes, France",
-  status: "prototype",
+  status: "published",
   updatedAt: new Date().toISOString()
 };
-
-const services = [
-  {
-    date: "Sunday",
-    time: "10:00",
-    title: "Divine Liturgy",
-    note: "Prototype schedule. Confirm with the parish before publication."
-  },
-  {
-    date: "Saturday",
-    time: "17:00",
-    title: "Vigil",
-    note: "Prototype schedule. Confirm with the parish before publication."
-  }
-];
 
 function sendJson(response, statusCode, payload) {
   const body = JSON.stringify(payload, null, 2);
@@ -64,7 +49,10 @@ const server = http.createServer((request, response) => {
   }
 
   if (url.pathname === "/api/services") {
-    sendJson(response, 200, { services });
+    sendJson(response, 200, {
+      services: [],
+      message: "The current service schedule is managed on the website through the CMS."
+    });
     return;
   }
 

@@ -1,70 +1,81 @@
 # Сайт прихода Архангела Михаила в Каннах
 
-Прототип сайта православного прихода Архистратига Михаила в Каннах с подготовкой к деплою на Render.
+Статический сайт православного прихода Архангела Михаила в Каннах с админ-панелью на Supabase и деплоем на Render.
 
 ## Структура
 
-- `frontend/` — статический сайт.
-- `backend/` — Node backend API.
+- `frontend/` — публичный сайт и админ-панель.
+- `frontend/assets/` — стили, скрипты, изображения и шрифт.
+- `backend/` — небольшой Node API для health-check и служебной информации.
+- `supabase/migrations/` — миграции таблиц CMS, медиа, новостей и прав доступа.
 - `render.yaml` — Render Blueprint для frontend и backend.
-- `frontend/structure.md` — рекомендуемая структура полноценного сайта.
 
-## Дизайн
+## Публичный сайт
 
-Для крупных заголовков подключен локальный церковнославянский титульный шрифт `Oglavie` из коллекции Slavonic Computing Initiative. Шрифты SCI распространяются под SIL Open Font License.
+Основные страницы:
 
-## Страницы
+- `index.html` — главная.
+- `history.html` — история.
+- `gallery.html` — галерея.
+- `schedule.html` — богослужения.
+- `sacraments.html` — таинства и требы.
+- `help.html` — помощь храму.
+- `contacts.html` — контакты.
+- `news.html` — новости.
 
-Основные разделы сайта реализованы отдельными HTML-страницами: расписание, таинства, история, посетителям, помощь, новости, контакты, а также страницы крещения, венчания, исповеди, причастия, записок и беседы со священником.
-
-## Языки
-
-Сайт доступен на русском, французском и английском языках.
-
-- Русские страницы: `schedule.html`, `baptism.html` и так далее.
-- Французские страницы: `schedule-fr.html`, `baptism-fr.html` и так далее, главная `fr.html`.
-- Английские страницы: `schedule-en.html`, `baptism-en.html` и так далее, главная `en.html`.
-
-Переключатель языков в шапке ведёт на соответствующую страницу текущего раздела.
+Французская и английская версии временно закрыты на уровне общего скрипта `frontend/assets/app.js`.
 
 ## Админ-панель
 
 Админ-панель доступна по адресу:
 
-- локально: `frontend/admin.html`
-- на Render: `/admin.html`
+- локально: `frontend/admin.html`;
+- на Render: `/admin.html`.
 
-Для Supabase:
+Вход выполняется через Supabase Auth по email и паролю. Экран подключения Supabase из админки убран; параметры проекта задаются в `frontend/assets/site-config.js`.
 
-1. Настроить GitHub Secrets по инструкции `docs/supabase-github.md`.
-2. Запустить GitHub Actions workflow `Supabase migrations`.
-3. Создать пользователя в Supabase Auth.
-4. Открыть `/admin.html`.
-5. Ввести Supabase URL и anon public key или прописать их в `frontend/assets/site-config.js`.
-6. Войти email/паролем пользователя Supabase Auth.
+Админ-панель управляет:
 
-Панель умеет читать, создавать, редактировать и удалять записи в таблицах `services`, `news`, `pages`.
-Новая CMS-часть использует таблицы `content_sections`, `media_files` и публичный Supabase Storage bucket `parish-media` для текстов, фотографий, PDF-расписаний и документов.
+- текстами разделов через `content_sections`;
+- фотографиями, PDF и документами через `media_files` и bucket `parish-media`;
+- новостями через `parish_news` и `parish_news_photos`;
+- галереей и историческими фотографиями;
+- банковскими реквизитами и блоком помощи храму.
+
+## Supabase
+
+Для применения миграций через GitHub Actions нужны secrets:
+
+- `SUPABASE_ACCESS_TOKEN`;
+- `SUPABASE_DB_PASSWORD`;
+- `SUPABASE_PROJECT_REF`.
+
+Workflow: `.github/workflows/supabase-migrations.yml`.
 
 ## Render
 
 Blueprint поднимает два сервиса:
 
-- `st-michael-church-cannes-frontend` — Static Site из папки `frontend`.
+- `st-michael-church-cannes-frontend` — Static Site из папки `frontend`;
 - `st-michael-church-cannes-backend` — Node Web Service из папки `backend`.
 
 Backend endpoints:
 
-- `GET /healthz`
-- `GET /api/site`
-- `GET /api/services`
+- `GET /healthz`;
+- `GET /api/site`;
+- `GET /api/services`.
 
-## Перед публикацией
+Актуальное расписание богослужений публикуется на сайте через CMS или PDF в разделе `Богослужения`.
 
-Нужно заменить прототипные данные на официальные:
+## Дизайн
 
-- актуальное расписание богослужений;
-- контакты канцелярии;
-- реквизиты для пожертвований;
-- юридическое наименование прихода;
-- разрешенные фотографии и материалы.
+В проекте подключён локальный церковнославянский титульный шрифт `Oglavie` из коллекции Slavonic Computing Initiative. Шрифт SCI распространяется по SIL Open Font License.
+
+Текущая визуальная гамма:
+
+- пергаментный фон;
+- старое золото;
+- бордовый акцент;
+- кипарисовый зелёный;
+- лазурный синий;
+- декоративные рамки и мягкие церковные орнаменты.
