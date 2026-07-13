@@ -54,20 +54,19 @@
     if (!hero || !record) return;
     const h1 = hero.querySelector("h1");
     const text = hero.querySelector("p:not(.section-label)");
-    if (h1 && record.title) h1.textContent = record.title;
-    if (text && record.summary) text.textContent = record.summary;
+    if (h1 && Object.prototype.hasOwnProperty.call(record, "title")) h1.textContent = record.title || "";
+    if (text && Object.prototype.hasOwnProperty.call(record, "summary")) text.textContent = record.summary || "";
   }
 
   function applyBody(record) {
-    if (!record || !record.body) return;
+    if (!record) return;
     const target =
       document.querySelector("[data-cms-body]") ||
       document.querySelector(".history-article") ||
       document.querySelector(".section.two-columns > div:first-child");
 
     if (!target) return;
-    const title = record.title ? `<h2>${escapeHtml(record.title)}</h2>` : "";
-    target.innerHTML = `${title}${paragraphsToHtml(record.body)}`;
+    target.innerHTML = paragraphsToHtml(record.body);
   }
 
   function applyNamedBlocks(records) {
@@ -78,8 +77,11 @@
 
       const title = target.querySelector("[data-cms-title]");
       const body = target.querySelector("[data-cms-text]");
-      if (title && record.title) title.textContent = record.title;
-      if (body && record.body) body.innerHTML = paragraphsToHtml(record.body);
+      if (title && Object.prototype.hasOwnProperty.call(record, "title")) {
+        title.textContent = record.title || "";
+        title.hidden = !record.title;
+      }
+      if (body && Object.prototype.hasOwnProperty.call(record, "body")) body.innerHTML = paragraphsToHtml(record.body);
     });
   }
 
