@@ -17,7 +17,13 @@
   --blue: #315f7d;
   --green: #5b6f55;
   --red: #8f4338;
+  --cypress: #526b4d;
+  --parchment: #e7d8b7;
+  --stone: #d7c7a8;
+  --burgundy: #6f2d2d;
+  --ivory: #fffdf7;
   --shadow: 0 18px 50px rgba(29, 39, 48, 0.16);
+  --soft-shadow: 0 14px 36px rgba(70, 47, 24, 0.12);
   --church-heading-font: "Oglavie", Georgia, "Times New Roman", serif;
   color-scheme: light;
 }
@@ -33,6 +39,8 @@ html {
 body {
   margin: 0;
   background:
+    radial-gradient(circle at 18% 8%, rgba(184, 138, 52, 0.18), transparent 26vw),
+    radial-gradient(circle at 86% 18%, rgba(49, 95, 125, 0.12), transparent 30vw),
     linear-gradient(90deg, rgba(184, 138, 52, 0.11) 1px, transparent 1px),
     linear-gradient(0deg, rgba(184, 138, 52, 0.08) 1px, transparent 1px),
     var(--paper);
@@ -55,8 +63,11 @@ a {
   gap: 24px;
   align-items: center;
   padding: 14px clamp(18px, 4vw, 56px);
-  background: rgba(247, 245, 239, 0.94);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.98), rgba(247, 241, 228, 0.94)),
+    var(--paper);
   border-bottom: 3px double var(--gold);
+  box-shadow: 0 12px 36px rgba(70, 47, 24, 0.08);
   backdrop-filter: blur(16px);
 }
 
@@ -192,7 +203,9 @@ a {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(105deg, rgba(8, 14, 20, 0.62) 0%, rgba(8, 14, 20, 0.22) 55%, rgba(8, 14, 20, 0.48) 100%);
+  background:
+    linear-gradient(105deg, rgba(29, 39, 48, 0.76) 0%, rgba(49, 95, 125, 0.28) 50%, rgba(111, 45, 45, 0.6) 100%),
+    radial-gradient(circle at 72% 22%, rgba(184, 138, 52, 0.32), transparent 30vw);
   z-index: 1;
 }
 
@@ -216,6 +229,17 @@ a {
   padding: clamp(28px, 7vw, 88px);
   color: white;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.hero-overlay::before {
+  content: "";
+  position: absolute;
+  inset: clamp(16px, 3vw, 38px);
+  z-index: -1;
+  border: 3px double rgba(232, 199, 116, 0.62);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(29, 39, 48, 0.42), rgba(111, 45, 45, 0.24));
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
 }
 
 .kicker,
@@ -396,15 +420,20 @@ h6 {
 }
 
 .section {
+  position: relative;
   max-width: 1180px;
   margin: 0 auto;
   padding: clamp(64px, 9vw, 108px) clamp(18px, 4vw, 32px);
 }
 
 .section:not(.feature-band):not(.help) {
-  background: rgba(255, 255, 255, 0.72);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.92), rgba(231, 216, 183, 0.42)),
+    radial-gradient(circle at 0 0, rgba(184, 138, 52, 0.16), transparent 22rem),
+    rgba(255, 255, 255, 0.72);
   border-left: 1px solid rgba(184, 138, 52, 0.35);
   border-right: 1px solid rgba(184, 138, 52, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 .page-hero {
@@ -413,10 +442,13 @@ h6 {
   margin: 32px auto 0;
   padding: clamp(72px, 10vw, 132px) clamp(28px, 5vw, 72px) clamp(42px, 7vw, 84px);
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.82);
+  background:
+    linear-gradient(115deg, rgba(255, 253, 247, 0.95) 0%, rgba(231, 216, 183, 0.82) 58%, rgba(49, 95, 125, 0.18) 100%),
+    url("church-cross.jpg") center/cover;
   border: 3px double var(--gold);
   outline: 1px solid rgba(184, 138, 52, 0.35);
   outline-offset: -12px;
+  box-shadow: var(--soft-shadow);
 }
 
 .page-hero::before,
@@ -442,6 +474,36 @@ h6 {
 .page-hero h1 {
   max-width: 860px;
   color: var(--ink);
+}
+
+.page-hero::before,
+.section:not(.feature-band):not(.help)::before {
+  content: "\2725";
+}
+
+.page-hero::after,
+.section:not(.feature-band):not(.help)::after {
+  content: "\2726";
+}
+
+.section:not(.feature-band):not(.help)::before,
+.section:not(.feature-band):not(.help)::after {
+  position: absolute;
+  color: rgba(184, 138, 52, 0.18);
+  font-family: var(--church-heading-font);
+  font-size: clamp(36px, 6vw, 78px);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.section:not(.feature-band):not(.help)::before {
+  top: 18px;
+  left: clamp(16px, 3vw, 34px);
+}
+
+.section:not(.feature-band):not(.help)::after {
+  right: clamp(16px, 3vw, 34px);
+  bottom: 18px;
 }
 
 .page-hero p:not(.section-label) {
@@ -475,6 +537,32 @@ h6 {
   font-size: 18px;
 }
 
+.section-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: clamp(24px, 4vw, 42px);
+  padding-bottom: 16px;
+  border-bottom: 3px double rgba(184, 138, 52, 0.42);
+}
+
+.section-heading::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: min(220px, 45%);
+  height: 3px;
+  background: linear-gradient(90deg, var(--burgundy), var(--gold));
+}
+
+.section-heading h2 {
+  margin-bottom: 0;
+  color: var(--burgundy);
+}
+
 .schedule-list {
   display: grid;
   gap: 14px;
@@ -483,10 +571,41 @@ h6 {
 .service-card,
 .news-grid article,
 .visitor-rules article {
+  position: relative;
   padding: 22px;
-  background: var(--surface);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(247, 241, 228, 0.9)),
+    var(--surface);
   border: 3px double var(--line);
   border-radius: 8px;
+  box-shadow: var(--soft-shadow);
+}
+
+.service-card::before,
+.news-grid article::before,
+.visitor-rules article::before,
+.info-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, var(--burgundy), var(--gold), var(--cypress), var(--blue));
+}
+
+.service-card::after,
+.news-grid article::after,
+.visitor-rules article::after,
+.info-card::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  width: 42px;
+  height: 42px;
+  border-right: 2px solid rgba(184, 138, 52, 0.38);
+  border-bottom: 2px solid rgba(184, 138, 52, 0.38);
+  pointer-events: none;
 }
 
 .service-card.featured {
@@ -505,14 +624,26 @@ h6 {
 }
 
 .feature-band {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
   gap: 40px;
   align-items: center;
   max-width: none;
   padding-inline: clamp(18px, 6vw, 72px);
-  background: var(--blue);
+  background:
+    linear-gradient(120deg, rgba(49, 95, 125, 0.96), rgba(82, 107, 77, 0.92)),
+    url("church-3.jpg") center/cover;
   color: white;
+  box-shadow: inset 0 0 0 1px rgba(232, 199, 116, 0.28);
+}
+
+.feature-band::before {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  border: 3px double rgba(232, 199, 116, 0.42);
+  pointer-events: none;
 }
 
 .feature-band p {
@@ -530,8 +661,9 @@ h6 {
 .link-grid-locked {
   min-height: 62px;
   padding: 18px;
-  background: rgba(255, 255, 255, 0.11);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.18), rgba(184, 138, 52, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: 8px;
   font-family: "Oglavie", Georgia, "Times New Roman", serif;
   font-size: clamp(24px, 2.4vw, 34px);
@@ -605,14 +737,19 @@ h6 {
 }
 
 .info-card {
+  position: relative;
   display: block;
   min-height: 210px;
   padding: 24px;
-  background: var(--surface);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(231, 216, 183, 0.34)),
+    var(--surface);
   border: 3px double var(--line);
   border-radius: 8px;
   color: inherit;
   text-decoration: none;
+  box-shadow: var(--soft-shadow);
 }
 
 .info-card h2 {
@@ -1026,11 +1163,13 @@ h6 {
 
 .quote-panel {
   padding: 28px;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.96), rgba(231, 216, 183, 0.48));
+  border: 3px double var(--gold);
   border-radius: 8px;
   color: var(--gold-dark);
   font-size: 24px;
+  box-shadow: var(--soft-shadow);
 }
 
 .schedule-poster {
@@ -1039,11 +1178,14 @@ h6 {
   margin: 0 auto;
   padding: clamp(34px, 7vw, 72px) clamp(24px, 6vw, 82px);
   overflow: hidden;
-  background: #fffef9;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(247, 241, 228, 0.92)),
+    radial-gradient(circle at 50% 0, rgba(184, 138, 52, 0.18), transparent 26rem);
   border: 4px double var(--gold);
   outline: 1px solid rgba(184, 138, 52, 0.42);
   outline-offset: -14px;
   text-align: center;
+  box-shadow: var(--shadow);
 }
 
 .schedule-poster::before,
@@ -1194,10 +1336,14 @@ main .section li,
 }
 
 .photo-card {
+  position: relative;
   overflow: hidden;
-  background: var(--surface);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(231, 216, 183, 0.38)),
+    var(--surface);
   border: 3px double var(--line);
   border-radius: 8px;
+  box-shadow: var(--soft-shadow);
 }
 
 .photo-card img {
@@ -1227,11 +1373,24 @@ main .section li,
 }
 
 .news-page-list .news-card {
+  position: relative;
   padding: 22px;
   overflow: hidden;
-  background: var(--surface);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(247, 241, 228, 0.9)),
+    var(--surface);
   border: 3px double var(--line);
   border-radius: 8px;
+  box-shadow: var(--soft-shadow);
+}
+
+.news-page-list .news-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, var(--burgundy), var(--gold), var(--blue));
+  z-index: 1;
 }
 
 .news-card-image {
@@ -1550,6 +1709,7 @@ main .section li,
   .nav-lang-row .lang-disabled:hover { opacity: 0.22; transform: none; filter: grayscale(1); }
 
   .quick-panel,
+  .section-heading,
   .intro-grid,
   .two-columns,
   .feature-band,
