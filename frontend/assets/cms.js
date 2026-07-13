@@ -9,9 +9,7 @@
   function pageKeyFromLocation() {
     const file = window.location.pathname.split("/").pop() || "index.html";
     if (pageMap[file] !== undefined) return pageMap[file];
-    return file
-      .replace(/\.html$/, "")
-      .replace(/-(fr|en)$/, "");
+    return file.replace(/\.html$/, "").replace(/-(fr|en)$/, "");
   }
 
   function languageFromLocation() {
@@ -21,12 +19,20 @@
     return document.documentElement.lang || "ru";
   }
 
+  function escapeHtml(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
   function paragraphsToHtml(text) {
     return String(text || "")
       .split(/\n{2,}/)
       .map((part) => part.trim())
       .filter(Boolean)
-      .map((part) => `<p>${part.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replace(/\n/g, "<br>")}</p>`)
+      .map((part) => `<p>${escapeHtml(part).replace(/\n/g, "<br>")}</p>`)
       .join("");
   }
 
@@ -48,41 +54,90 @@
       document.querySelector("main .section:not(.page-hero)");
 
     if (!target) return;
-    const title = record.title ? `<h2>${record.title.replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</h2>` : "";
+    const title = record.title ? `<h2>${escapeHtml(record.title)}</h2>` : "";
     target.innerHTML = `${title}${paragraphsToHtml(record.body)}`;
+  }
+
+  function applyExtraBlocks(records) {
+    const target = document.querySelector("[data-cms-extra]");
+    if (!target) return;
+
+    const extras = records.filter((item) => {
+      return !["hero", "body"].includes(item.section_key) && (item.title || item.summary || item.body);
+    });
+    if (!extras.length) return;
+
+    target.innerHTML = extras.map((item) => `
+      <article class="info-card">
+        ${item.title ? `<h2>${escapeHtml(item.title)}</h2>` : ""}
+        ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
+        ${item.body ? paragraphsToHtml(item.body) : ""}
+      </article>
+    `).join("");
   }
 
   function applySchedulePdf(media) {
     const pdf = media.find((item) => item.purpose === "schedule_pdf" && item.file_url);
     if (!pdf) return;
-    const poster = document.querySelector(".schedule-poster");
-    if (!poster) return;
+
+    const target = document.querySelector("[data-cms-documents]") || document.querySelector(".schedule-poster");
+    if (!target) return;
+
     const link = document.createElement("a");
     link.className = "button primary cms-media-button";
     link.href = pdf.file_url;
     link.target = "_blank";
     link.rel = "noopener";
     link.textContent = pdf.title || "Открыть PDF расписания";
-    poster.appendChild(link);
+    target.appendChild(link);
+  }
+
+  function applyDocuments(media) {
+    const documents = media.filter((item) => {
+      return item.file_url && !(item.mime_type || "").startsWith("image/") && item.purpose !== "schedule_pdf";
+    });
+    if (!documents.length) return;
+
+    let target = document.querySelector("[data-cms-documents]");
+    if (!target) {
+      const section = document.createElement("section");
+      section.className = "section cms-documents";
+      section.setAttribute("data-cms-documents", "");
+      document.querySelector("main").appendChild(section);
+      target = section;
+    }
+
+    target.insertAdjacentHTML("beforeend", `
+      <div class="document-list">
+        ${documents.map((item) => `
+          <a class="info-card document-card" href="${item.file_url}" target="_blank" rel="noopener">
+            <h2>${escapeHtml(item.title || item.file_name || "Документ")}</h2>
+            ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ""}
+          </a>
+        `).join("")}
+      </div>
+    `);
   }
 
   function applyGallery(media) {
-    const images = media.filter((item) => item.file_url && item.mime_type && item.mime_type.startsWith("image/"));
+    const images = media.filter((item) => item.file_url && (item.mime_type || "").startsWith("image/"));
     if (!images.length) return;
-    let gallery = document.querySelector(".photo-gallery");
+
+    let gallery = document.querySelector("[data-cms-gallery]") || document.querySelector(".photo-gallery");
     if (!gallery) {
       const section = document.createElement("section");
       section.className = "section";
       gallery = document.createElement("div");
       gallery.className = "photo-gallery";
+      gallery.setAttribute("data-cms-gallery", "");
       section.appendChild(gallery);
       document.querySelector("main").appendChild(section);
     }
 
     gallery.innerHTML = images.map((item) => `
       <figure class="photo-card">
-        <img src="${item.file_url}" alt="${item.description || item.title || ""}">
-        <figcaption>${item.title || item.description || ""}</figcaption>
+        <img src="${item.file_url}" alt="${escapeHtml(item.description || item.title || "")}">
+        <figcaption>${escapeHtml(item.title || item.description || "")}</figcaption>
       </figure>
     `).join("");
   }
@@ -113,9 +168,11 @@
     const content = sections || [];
     applyHero(content.find((item) => item.section_key === "hero"));
     applyBody(content.find((item) => item.section_key === "body"));
+    applyExtraBlocks(content);
 
     const mediaFiles = media || [];
     applySchedulePdf(mediaFiles);
+    applyDocuments(mediaFiles);
     applyGallery(mediaFiles);
   }
 

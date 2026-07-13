@@ -1050,6 +1050,51 @@ h3 {
   margin-top: 8px;
 }
 
+.sacrament-article {
+  max-width: 920px;
+}
+
+.sacrament-article h3 {
+  margin: 30px 0 10px;
+  color: var(--gold-dark);
+  font-size: clamp(24px, 2.5vw, 34px);
+}
+
+.sacrament-article blockquote {
+  margin: 18px 0;
+  padding: 16px 20px;
+  border-left: 4px solid var(--gold);
+  background: #fffef9;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.cms-extra-blocks,
+.help-actions,
+.document-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.cms-documents:empty {
+  display: none;
+}
+
+.cms-documents {
+  display: grid;
+  gap: 16px;
+}
+
+.document-card {
+  display: block;
+}
+
+.cms-media-button {
+  justify-self: center;
+  margin-top: 18px;
+}
+
 .photo-gallery {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1305,7 +1350,10 @@ h3 {
   .feature-band,
   .visit,
   .help,
-  .contacts {
+  .contacts,
+  .cms-extra-blocks,
+  .help-actions,
+  .document-list {
     grid-template-columns: 1fr;
   }
 
