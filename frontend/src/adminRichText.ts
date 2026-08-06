@@ -13,6 +13,18 @@ const fontOptions = [
   ["Oglavie, Georgia, serif", "Церковный"]
 ];
 
+const sizeOptions = [
+  ["", "Размер"],
+  ["13px", "13"],
+  ["15px", "15"],
+  ["17px", "17"],
+  ["19px", "19"],
+  ["22px", "22"],
+  ["26px", "26"],
+  ["30px", "30"],
+  ["36px", "36"]
+];
+
 const blockOptions = [
   ["P", "Абзац"],
   ["H2", "Заголовок"],
@@ -70,30 +82,41 @@ export function createRichTextEditor(textarea: HTMLTextAreaElement): RichTextEdi
     if (value) document.execCommand("fontName", false, value);
   });
 
+  const editor = document.createElement("div");
+  editor.className = "rich-editable";
+  if (textarea.classList.contains("admin-large-textarea")) wrapper.classList.add("is-large");
+  editor.contentEditable = "true";
+  editor.innerHTML = richTextToHtml(textarea.value);
+
+  const sizeSelect = makeSelect(sizeOptions, "Размер букв", (value) => {
+    if (!value) return;
+    document.execCommand("fontSize", false, "7");
+    editor.querySelectorAll("font[size='7']").forEach((node) => {
+      const element = node as HTMLElement;
+      element.removeAttribute("size");
+      element.style.fontSize = value;
+    });
+  });
+
   const blockSelect = makeSelect(blockOptions, "Стиль", (value) => {
     document.execCommand("formatBlock", false, value);
   });
 
   toolbar.append(
     fontSelect,
+    sizeSelect,
     blockSelect,
     makeButton("B", "Жирный", "bold"),
     makeButton("I", "Курсив", "italic"),
     makeButton("U", "Подчеркнуть", "underline"),
-    makeButton("•", "Маркированный список", "insertUnorderedList"),
+    makeButton("List", "Маркированный список", "insertUnorderedList"),
     makeButton("1.", "Нумерованный список", "insertOrderedList"),
-    makeButton("←", "По левому краю", "justifyLeft"),
-    makeButton("↔", "По центру", "justifyCenter"),
-    makeButton("→", "По правому краю", "justifyRight"),
+    makeButton("Left", "По левому краю", "justifyLeft"),
+    makeButton("Center", "По центру", "justifyCenter"),
+    makeButton("Right", "По правому краю", "justifyRight"),
     makeLinkButton(),
-    makeButton("×", "Убрать формат", "removeFormat")
+    makeButton("Clear", "Убрать формат", "removeFormat")
   );
-
-  const editor = document.createElement("div");
-  editor.className = "rich-editable";
-  if (textarea.classList.contains("admin-large-textarea")) wrapper.classList.add("is-large");
-  editor.contentEditable = "true";
-  editor.innerHTML = richTextToHtml(textarea.value);
 
   wrapper.append(toolbar, editor);
   textarea.hidden = true;
