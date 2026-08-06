@@ -2,6 +2,7 @@
 
 import "./site-config";
 import { createAdminAuth } from "./adminAuth";
+import { createAdminContent } from "./adminContent";
 import { MEDIA_BUCKET, adminSections, fileExtension, slugify, validateUploadFile } from "./adminConfig";
 import { escapeHtml } from "./shared";
 import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
@@ -12,27 +13,15 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
   let client = null;
   let activeSection = sections[0];
   let activeLanguage = "ru";
-  let activeBlock = "hero";
-  let contentRecords = [];
   let mediaRecords = [];
   let newsRecords = [];
   let newsPhotos = [];
 
   const $ = (id) => document.getElementById(id);
 
-  const hasContentEditor = () => Array.isArray(activeSection.blocks) && activeSection.blocks.length > 0;
   const hasMediaEditor = () => Array.isArray(activeSection.media) && activeSection.media.length > 0;
   const isPdfFile = (file) => {
     return file && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
-  };
-
-  const contentFields = {
-    id: $("content-id"),
-    section: $("content-section"),
-    title: $("content-title"),
-    summary: $("content-summary"),
-    body: $("content-body"),
-    status: $("content-status")
   };
 
   const mediaFields = {
@@ -60,6 +49,14 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     if (node) node.textContent = text;
   }
 
+  const content = createAdminContent({
+    $,
+    setText,
+    getClient: () => client,
+    getSection: () => activeSection,
+    getLanguage: () => activeLanguage
+  });
+
   function showWorkspace(email) {
     document.body.classList.remove("is-login");
     document.body.classList.add("is-authenticated");
@@ -79,22 +76,6 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
       button.textContent = section.title;
       button.addEventListener("click", () => selectSection(section.key));
       menu.appendChild(button);
-    });
-  }
-
-  function renderBlockTabs() {
-    const panel = $("content-panel");
-    const tabs = $("content-block-tabs");
-    if (panel) panel.hidden = !hasContentEditor();
-    tabs.innerHTML = "";
-    if (!hasContentEditor()) return;
-    activeSection.blocks.forEach(([key, label]) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = key === activeBlock ? "active" : "";
-      button.textContent = label;
-      button.addEventListener("click", () => selectBlock(key));
-      tabs.appendChild(button);
     });
   }
 
@@ -132,35 +113,27 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     const statsPanel = $("stats-admin-panel");
     if (statsPanel) statsPanel.hidden = !activeSection.statsManager;
     const editorGrid = document.querySelector(".admin-editor-grid");
-    if (editorGrid) editorGrid.hidden = activeSection.statsManager || (!hasContentEditor() && !hasMediaEditor());
+    if (editorGrid) editorGrid.hidden = activeSection.statsManager || (!content.hasEditor() && !hasMediaEditor());
   }
 
   function selectSection(key) {
     activeSection = sections.find((section) => section.key === key) || sections[0];
-    activeBlock = hasContentEditor() ? activeSection.blocks[0][0] : "";
-    clearContentForm();
+    content.setSection(activeSection);
+    content.clearForm();
     clearMediaForm();
     renderSectionMenu();
     renderSectionHeader();
-    renderBlockTabs();
+    content.renderBlockTabs();
     renderMediaPurposes();
     loadSectionData();
   }
 
-  function selectBlock(key) {
-    if (!hasContentEditor()) return;
-    activeBlock = key;
-    clearContentForm();
-    renderBlockTabs();
-    fillContentFromExisting();
-  }
-
   function selectLanguage(language) {
     activeLanguage = language;
-    clearContentForm();
+    content.clearForm();
     clearNewsForm();
     renderLanguageButtons();
-    if (hasContentEditor()) loadContentRecords();
+    if (content.hasEditor()) content.loadRecords();
     if (activeSection.newsManager) loadNewsRecords();
   }
 
@@ -168,14 +141,13 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     if (!client || $("admin-workspace").hidden) return;
     renderSectionMenu();
     renderSectionHeader();
-    renderBlockTabs();
+    content.renderBlockTabs();
     renderMediaPurposes();
     renderLanguageButtons();
     const jobs = [];
-    if (hasContentEditor()) jobs.push(loadContentRecords());
+    if (content.hasEditor()) jobs.push(content.loadRecords());
     else {
-      contentRecords = [];
-      renderContentRecords();
+      content.clearRecords();
     }
     if (hasMediaEditor()) jobs.push(loadMediaRecords());
     else {
@@ -185,130 +157,6 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     await Promise.all(jobs);
     if (activeSection.newsManager) await loadNewsRecords();
     if (activeSection.statsManager) await loadStats();
-  }
-
-  function contentPayload() {
-    return {
-      page_key: activeSection.key,
-      language: activeLanguage,
-      section_key: activeBlock,
-      title: contentFields.title.value.trim(),
-      summary: contentFields.summary.value.trim(),
-      body: contentFields.body.value.trim(),
-      status: contentFields.status.value,
-      sort_order: hasContentEditor() ? activeSection.blocks.findIndex(([key]) => key === activeBlock) : 0,
-      updated_at: new Date().toISOString()
-    };
-  }
-
-  function clearContentForm() {
-    contentFields.id.value = "";
-    contentFields.section.value = activeBlock;
-    contentFields.title.value = "";
-    contentFields.summary.value = "";
-    contentFields.body.value = "";
-    contentFields.status.value = "published";
-  }
-
-  function fillContentForm(record) {
-    contentFields.id.value = record.id || "";
-    contentFields.section.value = record.section_key || activeBlock;
-    contentFields.title.value = record.title || "";
-    contentFields.summary.value = record.summary || "";
-    contentFields.body.value = record.body || "";
-    contentFields.status.value = record.status || "published";
-  }
-
-  function fillContentFromExisting() {
-    const record = contentRecords.find((item) => item.section_key === activeBlock);
-    if (record) fillContentForm(record);
-  }
-
-  async function loadContentRecords() {
-    if (!client || !hasContentEditor()) {
-      contentRecords = [];
-      renderContentRecords();
-      return;
-    }
-    const { data, error } = await client
-      .from("content_sections")
-      .select("*")
-      .eq("page_key", activeSection.key)
-      .eq("language", activeLanguage)
-      .order("sort_order", { ascending: true });
-
-    if (error) {
-      contentRecords = [];
-      renderContentRecords();
-      setText("editor-status", `Ошибка чтения текстов: ${error.message}`);
-      return;
-    }
-
-    contentRecords = data || [];
-    renderContentRecords();
-    fillContentFromExisting();
-    setText("editor-status", `Раздел «${activeSection.title}» загружен.`);
-  }
-
-  function renderContentRecords() {
-    const list = $("content-list");
-    if (!list || !hasContentEditor()) return;
-    list.innerHTML = "";
-
-    if (!contentRecords.length) {
-      list.innerHTML = '<div class="admin-empty">Для этого языка пока нет сохраненных текстов.</div>';
-      return;
-    }
-
-    contentRecords.forEach((record) => {
-      const label = (activeSection.blocks.find(([key]) => key === record.section_key) || [record.section_key, record.section_key])[1];
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "admin-row";
-      button.innerHTML = `<strong>${escapeHtml(label)}</strong><br><span>${escapeHtml(record.title || "Без заголовка")} · ${escapeHtml(record.status)}</span>`;
-      button.addEventListener("click", () => {
-        activeBlock = record.section_key;
-        renderBlockTabs();
-        fillContentForm(record);
-      });
-      list.appendChild(button);
-    });
-  }
-
-  async function saveContent(event) {
-    event.preventDefault();
-    if (!client || !hasContentEditor()) return;
-
-    const existing = contentRecords.find((item) => item.section_key === activeBlock);
-    const id = contentFields.id.value || (existing && existing.id);
-    const payload = contentPayload();
-    const query = id
-      ? client.from("content_sections").update(payload).eq("id", id)
-      : client.from("content_sections").insert(payload);
-
-    const { error } = await query;
-    if (error) {
-      setText("editor-status", `Ошибка сохранения текста: ${error.message}`);
-      return;
-    }
-
-    await loadContentRecords();
-    setText("editor-status", "Текст сохранен.");
-  }
-
-  async function deleteContent() {
-    const id = contentFields.id.value;
-    if (!client || !id) return;
-
-    const { error } = await client.from("content_sections").delete().eq("id", id);
-    if (error) {
-      setText("editor-status", `Ошибка удаления текста: ${error.message}`);
-      return;
-    }
-
-    clearContentForm();
-    await loadContentRecords();
-    setText("editor-status", "Текст удален.");
   }
 
   function mediaPayload(publicUrl, storagePath, file) {
@@ -829,18 +677,15 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
 
     renderSectionMenu();
     renderSectionHeader();
-    renderBlockTabs();
+    content.renderBlockTabs();
     renderMediaPurposes();
     auth.bindEvents();
+    content.bindEvents();
     auth.checkSession();
 
     document.querySelectorAll(".admin-language-switch button").forEach((button) => {
       button.addEventListener("click", () => selectLanguage(button.dataset.language));
     });
-
-    $("content-form").addEventListener("submit", saveContent);
-    $("clear-content-button").addEventListener("click", clearContentForm);
-    $("delete-content-button").addEventListener("click", deleteContent);
 
     $("media-form").addEventListener("submit", saveMedia);
     $("clear-media-button").addEventListener("click", clearMediaForm);
