@@ -1,6 +1,5 @@
 import "./site-config";
 import { applyBody, applyExtraBlocks, applyHero, applyNamedBlocks } from "./cmsContent";
-import { fallbackSections, mergeFallbackSections } from "./cmsFallbacks";
 import { applyDocuments, applyGallery, applySchedulePdf, setupLightbox } from "./cmsMedia";
 import { loadNews } from "./cmsNews";
 import { languageFromLocation, pageKeyFromLocation } from "./cmsRouting";
@@ -14,7 +13,6 @@ import type { ContentSection, MediaFile } from "./types";
     const pageKey = pageKeyFromLocation();
     const language = languageFromLocation();
     const client = window.supabase.createClient(window.ST_MICHAEL_SUPABASE_URL, window.ST_MICHAEL_SUPABASE_ANON_KEY);
-    const fallbackContent = fallbackSections(pageKey, language);
     trackVisit(client, pageKey, language);
 
     let sections: ContentSection[] = [];
@@ -39,7 +37,7 @@ import type { ContentSection, MediaFile } from "./types";
       media = [];
     }
 
-    const content = mergeFallbackSections(fallbackContent, sections);
+    const content = sections;
     applyHero(content.find((item) => item.section_key === "hero"));
     applyBody(content.find((item) => item.section_key === "body"));
     applyNamedBlocks(content);
