@@ -1,66 +1,13 @@
 ﻿// @ts-nocheck
 
 import "./site-config";
+import { applyBody, applyExtraBlocks, applyHero, applyNamedBlocks } from "./cmsContent";
 import { languageFromLocation, pageKeyFromLocation } from "./cmsRouting";
 import { trackVisit } from "./cmsVisits";
 import { escapeHtml, formatPublicDate, paragraphsToHtml, safePublicUrl } from "./shared";
-import type { ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
+import type { LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
 
 (function () {
-  function applyHero(record) {
-    const hero = document.querySelector(".page-hero");
-    if (!hero || !record) return;
-    const h1 = hero.querySelector("h1");
-    const text = hero.querySelector("p:not(.section-label)");
-    if (h1 && Object.prototype.hasOwnProperty.call(record, "title")) h1.textContent = record.title || "";
-    if (text && Object.prototype.hasOwnProperty.call(record, "summary")) text.textContent = record.summary || "";
-  }
-
-  function applyBody(record) {
-    if (!record) return;
-    const target =
-      document.querySelector("[data-cms-body]") ||
-      document.querySelector(".history-article") ||
-      document.querySelector(".section.two-columns > div:first-child");
-
-    if (!target) return;
-    target.innerHTML = paragraphsToHtml(record.body);
-  }
-
-  function applyNamedBlocks(records) {
-    document.querySelectorAll("[data-cms-section]").forEach((target) => {
-      const key = target.getAttribute("data-cms-section");
-      const record = records.find((item) => item.section_key === key);
-      if (!record) return;
-
-      const title = target.querySelector("[data-cms-title]");
-      const body = target.querySelector("[data-cms-text]");
-      if (title && Object.prototype.hasOwnProperty.call(record, "title")) {
-        title.textContent = record.title || "";
-        title.hidden = !record.title;
-      }
-      if (body && Object.prototype.hasOwnProperty.call(record, "body")) body.innerHTML = paragraphsToHtml(record.body);
-    });
-  }
-
-  function applyExtraBlocks(records) {
-    const target = document.querySelector("[data-cms-extra]");
-    if (!target) return;
-
-    const extras = records.filter((item) => {
-      return !["hero", "body"].includes(item.section_key) && (item.title || item.summary || item.body);
-    });
-    if (!extras.length) return;
-
-    target.innerHTML = extras.map((item) => `
-      <article class="info-card">
-        ${item.title ? `<h2>${escapeHtml(item.title)}</h2>` : ""}
-        ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
-        ${item.body ? paragraphsToHtml(item.body) : ""}
-      </article>
-    `).join("");
-  }
-
   const PDFJS_SCRIPT_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";
   const PDFJS_WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
 
