@@ -1,64 +1,12 @@
 ﻿// @ts-nocheck
 
 import "./site-config";
+import { languageFromLocation, pageKeyFromLocation } from "./cmsRouting";
+import { trackVisit } from "./cmsVisits";
 import { escapeHtml, formatPublicDate, paragraphsToHtml, safePublicUrl } from "./shared";
 import type { ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
 
 (function () {
-  const pageMap = {
-    "index.html": "home",
-    "": "home",
-    "fr.html": "home",
-    "en.html": "home"
-  };
-
-  function pageKeyFromLocation() {
-    const file = window.location.pathname.split("/").pop() || "index.html";
-    if (pageMap[file] !== undefined) return pageMap[file];
-    return file.replace(/\.html$/, "").replace(/-(fr|en)$/, "");
-  }
-
-  function languageFromLocation() {
-    const file = window.location.pathname.split("/").pop() || "index.html";
-    if (file.endsWith("-fr.html") || file === "fr.html") return "fr";
-    if (file.endsWith("-en.html") || file === "en.html") return "en";
-    return document.documentElement.lang || "ru";
-  }
-
-
-  function visitorSessionId() {
-    const key = "st_michael_visit_session";
-    let value = "";
-    try {
-      value = window.localStorage.getItem(key) || "";
-      if (!value) {
-        value = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
-        window.localStorage.setItem(key, value);
-      }
-    } catch (_) {
-      value = "";
-    }
-    return value;
-  }
-
-  async function trackVisit(client, pageKey, language) {
-    const file = window.location.pathname.split("/").pop() || "index.html";
-    if (file === "admin.html") return;
-
-    try {
-      await client.from("page_visits").insert({
-        page_key: pageKey,
-        page_path: window.location.pathname,
-        language,
-        session_id: visitorSessionId(),
-        referrer: document.referrer ? document.referrer.slice(0, 500) : "",
-        user_agent: navigator.userAgent ? navigator.userAgent.slice(0, 500) : ""
-      });
-    } catch (_) {
-      // Statistics must never block public page rendering.
-    }
-  }
-
   function applyHero(record) {
     const hero = document.querySelector(".page-hero");
     if (!hero || !record) return;
