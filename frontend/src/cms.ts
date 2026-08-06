@@ -1,6 +1,7 @@
 ﻿// @ts-nocheck
 
 import "./site-config";
+import { escapeHtml, formatPublicDate, paragraphsToHtml, safePublicUrl } from "./shared";
 import type { ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
 
 (function () {
@@ -24,25 +25,6 @@ import type { ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPho
     return document.documentElement.lang || "ru";
   }
 
-  function escapeHtml(value) {
-    return String(value || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;");
-  }
-
-  function safePublicUrl(value) {
-    if (!value) return "";
-    try {
-      const url = new URL(value, window.location.origin);
-      if (!["https:", "http:"].includes(url.protocol)) return "";
-      if (url.protocol === "http:" && url.hostname !== window.location.hostname) return "";
-      return url.href;
-    } catch (_) {
-      return "";
-    }
-  }
 
   function visitorSessionId() {
     const key = "st_michael_visit_session";
@@ -74,28 +56,6 @@ import type { ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPho
       });
     } catch (_) {
       // Statistics must never block public page rendering.
-    }
-  }
-
-  function paragraphsToHtml(text) {
-    return String(text || "")
-      .split(/\n{2,}/)
-      .map((part) => part.trim())
-      .filter(Boolean)
-      .map((part) => `<p>${escapeHtml(part).replace(/\n/g, "<br>")}</p>`)
-      .join("");
-  }
-
-  function formatDate(value, language) {
-    if (!value) return "";
-    try {
-      return new Intl.DateTimeFormat(language === "en" ? "en-GB" : language === "fr" ? "fr-FR" : "ru-RU", {
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-      }).format(new Date(`${value}T00:00:00`));
-    } catch (_) {
-      return value;
     }
   }
 
@@ -336,7 +296,7 @@ import type { ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPho
     return `
       <article class="news-card">
         ${firstPhoto ? `<img class="news-card-image" src="${escapeHtml(firstPhoto.safe_url)}" alt="${escapeHtml(firstPhoto.description || item.title)}" loading="lazy">` : ""}
-        <time>${escapeHtml(formatDate(item.event_date, language))}</time>
+        <time>${escapeHtml(formatPublicDate(item.event_date, language))}</time>
         <h3>${escapeHtml(item.title)}</h3>
         ${item.excerpt ? `<p>${escapeHtml(item.excerpt)}</p>` : ""}
         ${item.body ? `<details><summary>${language === "fr" ? "Lire la suite" : language === "en" ? "Read more" : "Читать полностью"}</summary>${paragraphsToHtml(item.body)}</details>` : ""}

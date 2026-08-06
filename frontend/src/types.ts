@@ -71,6 +71,7 @@ export interface AdminSectionConfig {
   blocks: Array<[string, string]>;
   media: Array<[string, string]>;
   imagesOnly?: boolean;
+  pdfOnly?: boolean;
   scheduleFileOnly?: boolean;
   newsManager?: boolean;
   statsManager?: boolean;
