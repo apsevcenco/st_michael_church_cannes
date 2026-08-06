@@ -1,24 +1,24 @@
-﻿// @ts-nocheck
-
-import "./site-config";
+﻿import "./site-config";
 import { createAdminAuth } from "./adminAuth";
 import { createAdminContent } from "./adminContent";
 import { adminSections } from "./adminConfig";
 import { createAdminMedia } from "./adminMedia";
 import { createAdminNews } from "./adminNews";
 import { createAdminStats } from "./adminStats";
-import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
+import type { AdminSectionConfig, LanguageCode } from "./types";
+
+type SupabaseClientLike = any;
 
 (function () {
-  const sections = adminSections;
+  const sections: AdminSectionConfig[] = adminSections;
 
-  let client = null;
-  let activeSection = sections[0];
-  let activeLanguage = "ru";
+  let client: SupabaseClientLike | null = null;
+  let activeSection: AdminSectionConfig = sections[0];
+  let activeLanguage: LanguageCode = "ru";
 
-  const $ = (id) => document.getElementById(id);
+  const $ = (id: string): HTMLElement | null => document.getElementById(id);
 
-  function setText(id, text) {
+  function setText(id: string, text: string): void {
     const node = $(id);
     if (node) node.textContent = text;
   }
@@ -53,17 +53,20 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     getSection: () => activeSection
   });
 
-  function showWorkspace(email) {
+  function showWorkspace(email?: string): void {
     document.body.classList.remove("is-login");
     document.body.classList.add("is-authenticated");
-    $("login-screen").hidden = true;
-    $("admin-workspace").hidden = false;
+    const loginScreen = $("login-screen");
+    const workspace = $("admin-workspace");
+    if (loginScreen) loginScreen.hidden = true;
+    if (workspace) workspace.hidden = false;
     setText("admin-user-email", email || "");
     loadSectionData();
   }
 
-  function renderSectionMenu() {
+  function renderSectionMenu(): void {
     const menu = $("section-menu");
+    if (!menu) return;
     menu.innerHTML = "";
     sections.forEach((section) => {
       const button = document.createElement("button");
@@ -75,13 +78,13 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     });
   }
 
-  function renderLanguageButtons() {
-    document.querySelectorAll(".admin-language-switch button").forEach((button) => {
+  function renderLanguageButtons(): void {
+    document.querySelectorAll<HTMLButtonElement>(".admin-language-switch button").forEach((button) => {
       button.classList.toggle("active", button.dataset.language === activeLanguage);
     });
   }
 
-  function renderSectionHeader() {
+  function renderSectionHeader(): void {
     setText("section-kicker", "Раздел сайта");
     setText("section-title", activeSection.title);
     setText("section-description", activeSection.description);
@@ -89,11 +92,11 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     if (newsPanel) newsPanel.hidden = !activeSection.newsManager;
     const statsPanel = $("stats-admin-panel");
     if (statsPanel) statsPanel.hidden = !activeSection.statsManager;
-    const editorGrid = document.querySelector(".admin-editor-grid");
+    const editorGrid = document.querySelector<HTMLElement>(".admin-editor-grid");
     if (editorGrid) editorGrid.hidden = activeSection.statsManager || (!content.hasEditor() && !media.hasEditor());
   }
 
-  function selectSection(key) {
+  function selectSection(key: string): void {
     activeSection = sections.find((section) => section.key === key) || sections[0];
     content.setSection(activeSection);
     content.clearForm();
@@ -105,7 +108,7 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     loadSectionData();
   }
 
-  function selectLanguage(language) {
+  function selectLanguage(language: LanguageCode): void {
     activeLanguage = language;
     content.clearForm();
     news.clearForm();
@@ -114,14 +117,15 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     if (activeSection.newsManager) news.loadRecords();
   }
 
-  async function loadSectionData() {
-    if (!client || $("admin-workspace").hidden) return;
+  async function loadSectionData(): Promise<void> {
+    const workspace = $("admin-workspace");
+    if (!client || workspace?.hidden) return;
     renderSectionMenu();
     renderSectionHeader();
     content.renderBlockTabs();
     media.renderPurposes();
     renderLanguageButtons();
-    const jobs = [];
+    const jobs: Array<Promise<void>> = [];
     if (content.hasEditor()) jobs.push(content.loadRecords());
     else {
       content.clearRecords();
@@ -140,7 +144,7 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
       $,
       setText,
       getClient: () => client,
-      setClient: (nextClient) => {
+      setClient: (nextClient: SupabaseClientLike) => {
         client = nextClient;
       },
       onWorkspaceReady: showWorkspace
@@ -159,8 +163,8 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     stats.bindEvents();
     auth.checkSession();
 
-    document.querySelectorAll(".admin-language-switch button").forEach((button) => {
-      button.addEventListener("click", () => selectLanguage(button.dataset.language));
+    document.querySelectorAll<HTMLButtonElement>(".admin-language-switch button").forEach((button) => {
+      button.addEventListener("click", () => selectLanguage((button.dataset.language || "ru") as LanguageCode));
     });
 
   });
