@@ -6,6 +6,7 @@ This folder contains the TypeScript source used by Vite.
 - `cms.ts` is the transitional public CMS loader. It is restored to readable UTF-8 and will be split into typed modules next.
 - `cmsContent.ts` contains typed rendering for public CMS text sections: hero, body, named blocks and extra blocks.
 - `cmsMedia.ts` contains typed rendering for public CMS media: schedule files, documents, galleries and lightbox.
+- `cmsNews.ts` contains typed public news loading and news-card rendering.
 - `cmsRouting.ts` contains typed public page-key and language detection for CMS pages.
 - `cmsVisits.ts` contains typed visit tracking for the admin statistics page.
 - `admin.ts` is the typed admin panel coordinator. Feature logic lives in dedicated admin modules.
@@ -19,4 +20,4 @@ This folder contains the TypeScript source used by Vite.
 - `types.ts` contains the shared CMS, media, news, visit and admin section contracts.
 - `site-config.ts` contains the public Supabase URL and anon key.
 
-Next migration step: continue splitting the public `cms.ts` rendering logic into typed modules, then remove its remaining `// @ts-nocheck`.
+Next migration step: tighten shared Supabase client typing and gradually enable stricter TypeScript checks.
