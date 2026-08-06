@@ -1080,6 +1080,93 @@ h6 {
   min-height: 240px;
 }
 
+.rich-editor {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffef9;
+}
+
+.rich-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  background: #f7f0df;
+}
+
+.rich-toolbar button,
+.rich-toolbar select {
+  width: auto;
+  min-height: 34px;
+  padding: 6px 9px;
+  border: 1px solid rgba(154, 112, 41, 0.42);
+  border-radius: 6px;
+  background: #fffaf0;
+  color: var(--ink);
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rich-toolbar select {
+  min-width: 112px;
+}
+
+.rich-editable {
+  min-height: 150px;
+  padding: 12px;
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
+  outline: none;
+}
+
+.rich-editor.is-large .rich-editable {
+  min-height: 270px;
+}
+
+.rich-editable h2,
+.rich-editable h3,
+.rich-editable h4 {
+  margin: 0.7em 0 0.35em;
+}
+
+.rich-editable p,
+.rich-editable blockquote,
+.rich-editable ul,
+.rich-editable ol {
+  margin: 0 0 0.8em;
+}
+
+.rich-editable ul,
+.rich-editable ol {
+  padding-left: 1.4em;
+}
+
+[data-cms-body] ul,
+[data-cms-body] ol,
+[data-cms-text] ul,
+[data-cms-text] ol,
+.news-card ul,
+.news-card ol {
+  margin: 0 0 1em;
+  padding-left: 1.5em;
+}
+
+[data-cms-body] blockquote,
+[data-cms-text] blockquote,
+.news-card blockquote {
+  margin: 1em 0;
+  padding-left: 1em;
+  border-left: 3px solid var(--gold);
+  color: var(--muted);
+}
+
 .admin-grid-two {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -1,4 +1,4 @@
-import { escapeHtml, paragraphsToHtml } from "./shared";
+import { escapeHtml, richTextToHtml } from "./shared";
 import type { ContentSection } from "./types";
 
 export function applyHero(record?: ContentSection): void {
@@ -9,7 +9,7 @@ export function applyHero(record?: ContentSection): void {
   const text = hero.querySelector("p:not(.section-label)");
 
   if (h1 && Object.prototype.hasOwnProperty.call(record, "title")) h1.textContent = record.title || "";
-  if (text && Object.prototype.hasOwnProperty.call(record, "summary")) text.textContent = record.summary || "";
+  if (text && Object.prototype.hasOwnProperty.call(record, "summary")) text.innerHTML = richTextToHtml(record.summary);
 }
 
 export function applyBody(record?: ContentSection): void {
@@ -21,7 +21,7 @@ export function applyBody(record?: ContentSection): void {
     document.querySelector(".section.two-columns > div:first-child");
 
   if (!target) return;
-  target.innerHTML = paragraphsToHtml(record.body);
+  target.innerHTML = richTextToHtml(record.body);
 }
 
 export function applyNamedBlocks(records: ContentSection[]): void {
@@ -38,7 +38,7 @@ export function applyNamedBlocks(records: ContentSection[]): void {
       title.toggleAttribute("hidden", !record.title);
     }
 
-    if (body && Object.prototype.hasOwnProperty.call(record, "body")) body.innerHTML = paragraphsToHtml(record.body);
+    if (body && Object.prototype.hasOwnProperty.call(record, "body")) body.innerHTML = richTextToHtml(record.body);
   });
 }
 
@@ -57,8 +57,8 @@ export function applyExtraBlocks(records: ContentSection[]): void {
       (item) => `
       <article class="info-card">
         ${item.title ? `<h2>${escapeHtml(item.title)}</h2>` : ""}
-        ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
-        ${item.body ? paragraphsToHtml(item.body) : ""}
+        ${item.summary ? richTextToHtml(item.summary) : ""}
+        ${item.body ? richTextToHtml(item.body) : ""}
       </article>
     `
     )

@@ -1,3 +1,4 @@
+import { createRichTextEditor } from "./adminRichText";
 import { escapeHtml } from "./shared";
 import type { AdminSectionConfig, ContentSection, LanguageCode } from "./types";
 
@@ -38,6 +39,9 @@ export function createAdminContent(options: AdminContentOptions) {
     body: requiredElement(options.$, "content-body"),
     status: requiredElement(options.$, "content-status")
   };
+  const summaryEditor = createRichTextEditor(fields.summary);
+  const bodyEditor = createRichTextEditor(fields.body);
+  const richEditors = [summaryEditor, bodyEditor];
 
   const hasEditor = (): boolean => {
     const section = options.getSection();
@@ -69,6 +73,8 @@ export function createAdminContent(options: AdminContentOptions) {
     fields.title.value = "";
     fields.summary.value = "";
     fields.body.value = "";
+    summaryEditor.setValue("");
+    bodyEditor.setValue("");
     fields.status.value = "published";
   };
 
@@ -78,6 +84,8 @@ export function createAdminContent(options: AdminContentOptions) {
     fields.title.value = record.title || "";
     fields.summary.value = record.summary || "";
     fields.body.value = record.body || "";
+    summaryEditor.setValue(record.summary || "");
+    bodyEditor.setValue(record.body || "");
     fields.status.value = record.status || "published";
   };
 
@@ -172,6 +180,7 @@ export function createAdminContent(options: AdminContentOptions) {
 
   const save = async (event: Event): Promise<void> => {
     event.preventDefault();
+    richEditors.forEach((editor) => editor.syncToTextarea());
     const client = options.getClient();
     if (!client || !hasEditor()) return;
 

@@ -1,4 +1,4 @@
-import { escapeHtml, formatPublicDate, paragraphsToHtml, safePublicUrl } from "./shared";
+import { escapeHtml, formatPublicDate, richTextToHtml, safePublicUrl } from "./shared";
 import type { LanguageCode, ParishNews, ParishNewsPhoto } from "./types";
 
 type SupabaseClient = {
@@ -27,8 +27,8 @@ function renderNewsCard(item: ParishNews, photos: ParishNewsPhoto[], language: L
         ${firstPhoto ? `<img class="news-card-image" src="${escapeHtml(firstPhoto.safe_url)}" alt="${escapeHtml(firstPhoto.description || item.title)}" loading="lazy">` : ""}
         <time>${escapeHtml(formatPublicDate(item.event_date, language))}</time>
         <h3>${escapeHtml(item.title)}</h3>
-        ${item.excerpt ? `<p>${escapeHtml(item.excerpt)}</p>` : ""}
-        ${item.body ? `<details><summary>${language === "fr" ? "Lire la suite" : language === "en" ? "Read more" : "Читать полностью"}</summary>${paragraphsToHtml(item.body)}</details>` : ""}
+        ${item.excerpt ? richTextToHtml(item.excerpt) : ""}
+        ${item.body ? `<details><summary>${language === "fr" ? "Lire la suite" : language === "en" ? "Read more" : "Читать полностью"}</summary>${richTextToHtml(item.body)}</details>` : ""}
         ${safePhotos.length > 1 ? `<div class="news-photo-strip">${safePhotos.map((photo) => `<img src="${escapeHtml(photo.safe_url)}" alt="${escapeHtml(photo.description || item.title)}" loading="lazy">`).join("")}</div>` : ""}
       </article>
     `;

@@ -1,4 +1,5 @@
 import { MEDIA_BUCKET, fileExtension, slugify, validateUploadFile } from "./adminConfig";
+import { createRichTextEditor } from "./adminRichText";
 import { escapeHtml } from "./shared";
 import type { AdminSectionConfig, LanguageCode, ParishNews, ParishNewsPhoto } from "./types";
 
@@ -42,6 +43,9 @@ export function createAdminNews(options: AdminNewsOptions) {
     status: requiredElement(options.$, "news-status"),
     photos: requiredElement(options.$, "news-photos")
   };
+  const excerptEditor = createRichTextEditor(fields.excerpt);
+  const bodyEditor = createRichTextEditor(fields.body);
+  const richEditors = [excerptEditor, bodyEditor];
 
   const isNewsSection = (): boolean => options.getSection().newsManager === true;
 
@@ -61,6 +65,8 @@ export function createAdminNews(options: AdminNewsOptions) {
     fields.title.value = "";
     fields.excerpt.value = "";
     fields.body.value = "";
+    excerptEditor.setValue("");
+    bodyEditor.setValue("");
     fields.status.value = "published";
     fields.photos.value = "";
     renderRecords();
@@ -72,6 +78,8 @@ export function createAdminNews(options: AdminNewsOptions) {
     fields.title.value = record.title || "";
     fields.excerpt.value = record.excerpt || "";
     fields.body.value = record.body || "";
+    excerptEditor.setValue(record.excerpt || "");
+    bodyEditor.setValue(record.body || "");
     fields.status.value = record.status || "published";
     fields.photos.value = "";
     renderRecords();
@@ -185,6 +193,7 @@ export function createAdminNews(options: AdminNewsOptions) {
 
   const save = async (event: Event): Promise<void> => {
     event.preventDefault();
+    richEditors.forEach((editor) => editor.syncToTextarea());
     const client = options.getClient();
     if (!client || !isNewsSection()) return;
 
