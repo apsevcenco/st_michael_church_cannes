@@ -1,117 +1,130 @@
-// @ts-nocheck
+type PageName = `${string}.html` | "";
 
-(function () {
-  var currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
-  var blockedLanguagePage = currentPage === 'fr.html' || currentPage === 'en.html' || /-(fr|en)\.html$/.test(currentPage);
+const currentPage = getCurrentPage();
 
-  if (blockedLanguagePage) {
-    window.location.replace('index.html');
-    return;
-  }
+function getCurrentPage(): PageName {
+  return (window.location.pathname.split("/").pop() || "index.html").toLowerCase() as PageName;
+}
 
-  function isBlockedLanguageHref(href) {
-    var page = String(href || '').split('#')[0].split('?')[0].split('/').pop().toLowerCase();
-    return page === 'fr.html' || page === 'en.html' || /-(fr|en)\.html$/.test(page);
-  }
+function isBlockedLanguagePage(page: string): boolean {
+  return page === "fr.html" || page === "en.html" || /-(fr|en)\.html$/.test(page);
+}
 
-  document.querySelectorAll('.church-lang-switch a').forEach(function (link) {
-    if (!isBlockedLanguageHref(link.getAttribute('href'))) return;
-    link.classList.add('lang-disabled');
-    link.setAttribute('aria-disabled', 'true');
-    link.setAttribute('title', 'Временно недоступно');
-    link.removeAttribute('href');
-    link.addEventListener('click', function (event) {
-      event.preventDefault();
-    });
+function pageFromHref(href: string | null): string {
+  return String(href || "")
+    .split("#")[0]
+    .split("?")[0]
+    .split("/")
+    .pop()
+    ?.toLowerCase() || "";
+}
+
+function pageHomeFor(file: string): string {
+  if (file === "fr.html" || file.endsWith("-fr.html")) return "fr.html";
+  if (file === "en.html" || file.endsWith("-en.html")) return "en.html";
+  return "index.html";
+}
+
+function blockDisabledLanguageLinks(): void {
+  document.querySelectorAll<HTMLAnchorElement>(".church-lang-switch a").forEach((link) => {
+    if (!isBlockedLanguagePage(pageFromHref(link.getAttribute("href")))) return;
+
+    link.classList.add("lang-disabled");
+    link.setAttribute("aria-disabled", "true");
+    link.setAttribute("title", "Временно недоступно");
+    link.removeAttribute("href");
+    link.addEventListener("click", (event) => event.preventDefault());
+  });
+}
+
+function addBackButton(): void {
+  if (["index.html", "fr.html", "en.html", "admin.html"].includes(currentPage)) return;
+
+  const main = document.querySelector("main");
+  if (!main || document.querySelector(".page-back")) return;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "page-back";
+  button.textContent = "Назад";
+  button.setAttribute("aria-label", "Вернуться назад");
+  button.addEventListener("click", () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = pageHomeFor(currentPage);
+    }
   });
 
-  function pageHomeFor(file) {
-    if (file === 'fr.html' || file.endsWith('-fr.html')) return 'fr.html';
-    if (file === 'en.html' || file.endsWith('-en.html')) return 'en.html';
-    return 'index.html';
-  }
+  main.insertBefore(button, main.firstElementChild);
+}
 
-  function addBackButton() {
-    if (currentPage === 'index.html' || currentPage === 'fr.html' || currentPage === 'en.html' || currentPage === 'admin.html') return;
-    var main = document.querySelector('main');
-    if (!main || document.querySelector('.page-back')) return;
+function setupHeroSlideshow(): void {
+  const slides = Array.from(document.querySelectorAll<HTMLElement>(".hero-slide"));
+  if (slides.length < 2) return;
 
-    var button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'page-back';
-    button.textContent = 'Назад';
-    button.setAttribute('aria-label', 'Вернуться назад');
-    button.addEventListener('click', function () {
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = pageHomeFor(currentPage);
-      }
-    });
+  let current = 0;
+  window.setInterval(() => {
+    slides[current].classList.remove("active");
+    current = (current + 1) % slides.length;
+    slides[current].classList.add("active");
+  }, 5000);
+}
 
-    main.insertBefore(button, main.firstElementChild);
-  }
-
-  addBackButton();
-
-  // Hero slideshow
-  var slides = document.querySelectorAll('.hero-slide');
-  if (slides.length >= 2) {
-    var current = 0;
-    setInterval(function () {
-      slides[current].classList.remove('active');
-      current = (current + 1) % slides.length;
-      slides[current].classList.add('active');
-    }, 5000);
-  }
-
-  // Mobile hamburger menu
-  var header = document.querySelector('.site-header');
-  var nav = document.querySelector('.main-nav');
+function setupMobileMenu(): void {
+  const header = document.querySelector<HTMLElement>(".site-header");
+  const nav = document.querySelector<HTMLElement>(".main-nav");
   if (!header || !nav) return;
 
-  // Inject hamburger button
-  var btn = document.createElement('button');
-  btn.className = 'hamburger-btn';
-  btn.setAttribute('aria-label', 'Меню');
-  btn.setAttribute('aria-expanded', 'false');
-  btn.innerHTML = '<span></span><span></span><span></span>';
-  header.appendChild(btn);
+  const button = document.createElement("button");
+  button.className = "hamburger-btn";
+  button.setAttribute("aria-label", "Меню");
+  button.setAttribute("aria-expanded", "false");
+  button.innerHTML = "<span></span><span></span><span></span>";
+  header.appendChild(button);
 
-  // Clone language flags into the bottom of the dropdown nav
-  var langSwitch = document.querySelector('.church-lang-switch');
+  const langSwitch = document.querySelector<HTMLElement>(".church-lang-switch");
   if (langSwitch) {
-    var langRow = langSwitch.cloneNode(true);
-    langRow.className = 'nav-lang-row';
+    const langRow = langSwitch.cloneNode(true) as HTMLElement;
+    langRow.className = "nav-lang-row";
     nav.appendChild(langRow);
   }
 
-  // Keep --header-h in sync so the fixed nav panel appears just below the sticky header
-  function syncHeaderH() {
-    document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
-  }
-  syncHeaderH();
-  window.addEventListener('resize', syncHeaderH);
+  const syncHeaderHeight = (): void => {
+    document.documentElement.style.setProperty("--header-h", `${header.offsetHeight}px`);
+  };
 
-  function closeMenu() {
-    nav.classList.remove('nav-open');
-    btn.classList.remove('is-open');
-    btn.setAttribute('aria-expanded', 'false');
-  }
+  const closeMenu = (): void => {
+    nav.classList.remove("nav-open");
+    button.classList.remove("is-open");
+    button.setAttribute("aria-expanded", "false");
+  };
 
-  btn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    syncHeaderH();
-    var isOpen = nav.classList.toggle('nav-open');
-    btn.classList.toggle('is-open', isOpen);
-    btn.setAttribute('aria-expanded', String(isOpen));
+  syncHeaderHeight();
+  window.addEventListener("resize", syncHeaderHeight);
+
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    syncHeaderHeight();
+    const isOpen = nav.classList.toggle("nav-open");
+    button.classList.toggle("is-open", isOpen);
+    button.setAttribute("aria-expanded", String(isOpen));
   });
 
-  document.addEventListener('click', function (e) {
-    if (!header.contains(e.target)) closeMenu();
+  document.addEventListener("click", (event) => {
+    if (event.target instanceof Node && !header.contains(event.target)) closeMenu();
   });
 
-  nav.addEventListener('click', function (e) {
-    if (e.target.tagName === 'A') closeMenu();
+  nav.addEventListener("click", (event) => {
+    if (event.target instanceof HTMLAnchorElement) closeMenu();
   });
-})();
+}
+
+if (isBlockedLanguagePage(currentPage)) {
+  window.location.replace("index.html");
+} else {
+  blockDisabledLanguageLinks();
+  addBackButton();
+  setupHeroSlideshow();
+  setupMobileMenu();
+}

@@ -1,6 +1,7 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 
 import "./site-config";
+import type { ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
 
 (function () {
   const pageMap = {

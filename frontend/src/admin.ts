@@ -1,6 +1,7 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 
 import "./site-config";
+import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
 
 (function () {
   const MEDIA_BUCKET = "parish-media";
