@@ -27,7 +27,9 @@ export interface MediaFile {
   purpose: string;
   file_name: string | null;
   file_url: string | null;
+  storage_path?: string | null;
   mime_type: string | null;
+  file_size?: number | null;
   title: string | null;
   description: string | null;
   status: PublishStatus;

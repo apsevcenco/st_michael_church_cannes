@@ -4,6 +4,7 @@ import "./site-config";
 import { createAdminAuth } from "./adminAuth";
 import { createAdminContent } from "./adminContent";
 import { MEDIA_BUCKET, adminSections, fileExtension, slugify, validateUploadFile } from "./adminConfig";
+import { createAdminMedia } from "./adminMedia";
 import { escapeHtml } from "./shared";
 import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
 
@@ -13,26 +14,10 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
   let client = null;
   let activeSection = sections[0];
   let activeLanguage = "ru";
-  let mediaRecords = [];
   let newsRecords = [];
   let newsPhotos = [];
 
   const $ = (id) => document.getElementById(id);
-
-  const hasMediaEditor = () => Array.isArray(activeSection.media) && activeSection.media.length > 0;
-  const isPdfFile = (file) => {
-    return file && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"));
-  };
-
-  const mediaFields = {
-    id: $("media-id"),
-    purpose: $("media-purpose"),
-    file: $("media-file"),
-    title: $("media-title"),
-    description: $("media-description"),
-    sort: $("media-sort"),
-    status: $("media-status")
-  };
 
   const newsFields = {
     id: $("news-id"),
@@ -57,6 +42,13 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     getLanguage: () => activeLanguage
   });
 
+  const media = createAdminMedia({
+    $,
+    setText,
+    getClient: () => client,
+    getSection: () => activeSection
+  });
+
   function showWorkspace(email) {
     document.body.classList.remove("is-login");
     document.body.classList.add("is-authenticated");
@@ -79,25 +71,6 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     });
   }
 
-  function renderMediaPurposes() {
-    const panel = $("media-panel");
-    if (panel) panel.hidden = !hasMediaEditor();
-    mediaFields.purpose.innerHTML = "";
-    if (!hasMediaEditor()) {
-      mediaFields.file.accept = "";
-      mediaFields.file.multiple = false;
-      return;
-    }
-    activeSection.media.forEach(([key, label]) => {
-      const option = document.createElement("option");
-      option.value = key;
-      option.textContent = label;
-      mediaFields.purpose.appendChild(option);
-    });
-    mediaFields.file.accept = activeSection.scheduleFileOnly ? "image/*,.pdf,application/pdf" : activeSection.pdfOnly ? ".pdf,application/pdf" : activeSection.imagesOnly ? "image/*" : "image/*,.pdf,.doc,.docx,.xls,.xlsx";
-    mediaFields.file.multiple = Boolean(activeSection.imagesOnly);
-  }
-
   function renderLanguageButtons() {
     document.querySelectorAll(".admin-language-switch button").forEach((button) => {
       button.classList.toggle("active", button.dataset.language === activeLanguage);
@@ -113,18 +86,18 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     const statsPanel = $("stats-admin-panel");
     if (statsPanel) statsPanel.hidden = !activeSection.statsManager;
     const editorGrid = document.querySelector(".admin-editor-grid");
-    if (editorGrid) editorGrid.hidden = activeSection.statsManager || (!content.hasEditor() && !hasMediaEditor());
+    if (editorGrid) editorGrid.hidden = activeSection.statsManager || (!content.hasEditor() && !media.hasEditor());
   }
 
   function selectSection(key) {
     activeSection = sections.find((section) => section.key === key) || sections[0];
     content.setSection(activeSection);
     content.clearForm();
-    clearMediaForm();
+    media.clearForm();
     renderSectionMenu();
     renderSectionHeader();
     content.renderBlockTabs();
-    renderMediaPurposes();
+    media.renderPurposes();
     loadSectionData();
   }
 
@@ -142,252 +115,20 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     renderSectionMenu();
     renderSectionHeader();
     content.renderBlockTabs();
-    renderMediaPurposes();
+    media.renderPurposes();
     renderLanguageButtons();
     const jobs = [];
     if (content.hasEditor()) jobs.push(content.loadRecords());
     else {
       content.clearRecords();
     }
-    if (hasMediaEditor()) jobs.push(loadMediaRecords());
+    if (media.hasEditor()) jobs.push(media.loadRecords());
     else {
-      mediaRecords = [];
-      renderMediaRecords();
+      media.clearRecords();
     }
     await Promise.all(jobs);
     if (activeSection.newsManager) await loadNewsRecords();
     if (activeSection.statsManager) await loadStats();
-  }
-
-  function mediaPayload(publicUrl, storagePath, file) {
-    return {
-      page_key: activeSection.key,
-      purpose: mediaFields.purpose.value,
-      title: mediaFields.title.value.trim() || (file ? file.name : ""),
-      description: mediaFields.description.value.trim(),
-      file_url: publicUrl,
-      storage_path: storagePath,
-      file_name: file ? file.name : undefined,
-      mime_type: file ? file.type : undefined,
-      file_size: file ? file.size : undefined,
-      status: mediaFields.status.value,
-      sort_order: Number(mediaFields.sort.value || 0),
-      updated_at: new Date().toISOString()
-    };
-  }
-
-  function clearMediaForm() {
-    mediaFields.id.value = "";
-    mediaFields.file.value = "";
-    mediaFields.title.value = "";
-    mediaFields.description.value = "";
-    mediaFields.sort.value = "0";
-    mediaFields.status.value = "published";
-    renderMediaRecords();
-  }
-
-  function fillMediaForm(record) {
-    mediaFields.id.value = record.id || "";
-    mediaFields.purpose.value = record.purpose || (hasMediaEditor() ? activeSection.media[0][0] : "");
-    mediaFields.file.value = "";
-    mediaFields.title.value = record.title || "";
-    mediaFields.description.value = record.description || "";
-    mediaFields.sort.value = record.sort_order || 0;
-    mediaFields.status.value = record.status || "published";
-    renderMediaRecords();
-    setText("editor-status", `Выбрано: ${record.title || record.file_name || "фото/файл"}.`);
-  }
-
-  async function loadMediaRecords() {
-    if (!client || !hasMediaEditor()) {
-      mediaRecords = [];
-      renderMediaRecords();
-      return;
-    }
-
-    const { data, error } = await client
-      .from("media_files")
-      .select("*")
-      .eq("page_key", activeSection.key)
-      .order("purpose", { ascending: true })
-      .order("sort_order", { ascending: true });
-
-    if (error) {
-      mediaRecords = [];
-      renderMediaRecords();
-      setText("editor-status", `Ошибка чтения файлов: ${error.message}`);
-      return;
-    }
-
-    mediaRecords = data || [];
-    renderMediaRecords();
-  }
-
-  function renderMediaRecords() {
-    const list = $("media-list");
-    if (!list) return;
-    list.innerHTML = "";
-
-    if (!mediaRecords.length) {
-      list.innerHTML = '<div class="admin-empty">Для этого раздела пока нет загруженных файлов.</div>';
-      return;
-    }
-
-    mediaRecords.forEach((record) => {
-      const label = (activeSection.media.find(([key]) => key === record.purpose) || [record.purpose, record.purpose])[1];
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = `admin-row admin-media-row${record.id === mediaFields.id.value ? " is-selected" : ""}`;
-      const preview = record.mime_type && record.mime_type.startsWith("image/") && record.file_url
-        ? `<img src="${escapeHtml(record.file_url)}" alt="">`
-        : `<span class="admin-file-chip">${escapeHtml(record.mime_type || "file")}</span>`;
-      button.innerHTML = `${preview}<span><strong>${escapeHtml(record.title || record.file_name || "Без названия")}</strong><br><small>${escapeHtml(label)} · ${escapeHtml(record.status)}</small></span>`;
-      button.addEventListener("click", () => fillMediaForm(record));
-      list.appendChild(button);
-    });
-  }
-
-  async function saveMedia(event) {
-    event.preventDefault();
-    if (!client || !hasMediaEditor()) return;
-
-    const files = Array.from(mediaFields.file.files || []);
-    const file = files[0];
-    const current = mediaRecords.find((record) => record.id === mediaFields.id.value);
-    let publicUrl = current ? current.file_url : "";
-    let storagePath = current ? current.storage_path : "";
-
-    if (activeSection.imagesOnly && !mediaFields.id.value && files.length > 1) {
-      const startSort = Number(mediaFields.sort.value || mediaRecords.length || 0);
-      const rows = [];
-      for (const [index, uploadFile] of files.entries()) {
-        const validation = validateUploadFile(uploadFile, activeSection);
-        if (!validation.ok) {
-          setText("editor-status", validation.message);
-          return;
-        }
-        if (!uploadFile.type.startsWith("image/")) {
-          setText("editor-status", "В раздел «Галерея» можно загружать только фотографии.");
-          return;
-        }
-        const extension = fileExtension(uploadFile);
-        const safeName = slugify(uploadFile.name.replace(/\.[^.]+$/, ""));
-        const path = `${activeSection.key}/${mediaFields.purpose.value}/${Date.now()}-${index}-${safeName}.${extension}`;
-        const { error: uploadError } = await client.storage.from(MEDIA_BUCKET).upload(path, uploadFile, {
-          cacheControl: "3600",
-          upsert: false
-        });
-        if (uploadError) {
-          setText("editor-status", `Ошибка загрузки файла: ${uploadError.message}`);
-          return;
-        }
-        const { data } = client.storage.from(MEDIA_BUCKET).getPublicUrl(path);
-        rows.push({
-          page_key: activeSection.key,
-          purpose: mediaFields.purpose.value,
-          title: mediaFields.title.value.trim() || uploadFile.name,
-          description: mediaFields.description.value.trim(),
-          file_url: data.publicUrl,
-          storage_path: path,
-          file_name: uploadFile.name,
-          mime_type: uploadFile.type,
-          file_size: uploadFile.size,
-          status: mediaFields.status.value,
-          sort_order: startSort + index,
-          updated_at: new Date().toISOString()
-        });
-      }
-      const { error } = await client.from("media_files").insert(rows);
-      if (error) {
-        setText("editor-status", `Ошибка сохранения файлов: ${error.message}`);
-        return;
-      }
-      clearMediaForm();
-      await loadMediaRecords();
-      setText("editor-status", `Загружено фотографий: ${rows.length}.`);
-      return;
-    }
-
-    if (file) {
-      const validation = validateUploadFile(file, activeSection);
-      if (!validation.ok) {
-        setText("editor-status", validation.message);
-        return;
-      }
-      if (activeSection.imagesOnly && !file.type.startsWith("image/")) {
-        setText("editor-status", "В раздел «Галерея» можно загружать только фотографии.");
-        return;
-      }
-      if (activeSection.pdfOnly && !isPdfFile(file)) {
-        setText("editor-status", "В расписание можно загрузить только PDF-файл.");
-        return;
-      }
-
-      const extension = fileExtension(file);
-      const safeName = slugify(file.name.replace(/\.[^.]+$/, ""));
-      storagePath = `${activeSection.key}/${mediaFields.purpose.value}/${Date.now()}-${safeName}.${extension}`;
-      const { error: uploadError } = await client.storage.from(MEDIA_BUCKET).upload(storagePath, file, {
-        cacheControl: "3600",
-        upsert: false
-      });
-
-      if (uploadError) {
-        setText("editor-status", `Ошибка загрузки файла: ${uploadError.message}`);
-        return;
-      }
-
-      const { data } = client.storage.from(MEDIA_BUCKET).getPublicUrl(storagePath);
-      publicUrl = data.publicUrl;
-    }
-
-    if (!publicUrl) {
-      setText("editor-status", "Выберите файл для загрузки.");
-      return;
-    }
-
-    const payload = mediaPayload(publicUrl, storagePath, file);
-    const query = mediaFields.id.value
-      ? client.from("media_files").update(payload).eq("id", mediaFields.id.value)
-      : client.from("media_files").insert(payload);
-
-    const { error } = await query;
-    if (error) {
-      setText("editor-status", `Ошибка сохранения файла: ${error.message}`);
-      return;
-    }
-
-    clearMediaForm();
-    await loadMediaRecords();
-    setText("editor-status", "Файл сохранен.");
-  }
-
-  async function deleteMedia() {
-    const id = mediaFields.id.value;
-    if (!client) return;
-    if (!id) {
-      setText("editor-status", "Сначала выберите фото или файл в списке ниже.");
-      return;
-    }
-
-    const record = mediaRecords.find((item) => item.id === id);
-    const name = record ? (record.title || record.file_name || "этот файл") : "этот файл";
-    if (!window.confirm(`Удалить «${name}»?`)) return;
-
-    let storageWarning = "";
-    if (record && record.storage_path) {
-      const { error: storageError } = await client.storage.from(MEDIA_BUCKET).remove([record.storage_path]);
-      if (storageError) storageWarning = ` Файл в хранилище не удалён: ${storageError.message}`;
-    }
-
-    const { error } = await client.from("media_files").delete().eq("id", id);
-    if (error) {
-      setText("editor-status", `Ошибка удаления файла: ${error.message}`);
-      return;
-    }
-
-    clearMediaForm();
-    await loadMediaRecords();
-    setText("editor-status", `Файл удалён из сайта.${storageWarning}`);
   }
 
   function clearNewsForm() {
@@ -678,18 +419,15 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     renderSectionMenu();
     renderSectionHeader();
     content.renderBlockTabs();
-    renderMediaPurposes();
+    media.renderPurposes();
     auth.bindEvents();
     content.bindEvents();
+    media.bindEvents();
     auth.checkSession();
 
     document.querySelectorAll(".admin-language-switch button").forEach((button) => {
       button.addEventListener("click", () => selectLanguage(button.dataset.language));
     });
-
-    $("media-form").addEventListener("submit", saveMedia);
-    $("clear-media-button").addEventListener("click", clearMediaForm);
-    $("delete-media-button").addEventListener("click", deleteMedia);
 
     $("news-form").addEventListener("submit", saveNews);
     $("clear-news-button").addEventListener("click", clearNewsForm);
