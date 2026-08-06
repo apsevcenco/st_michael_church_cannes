@@ -5,6 +5,7 @@ This folder contains the TypeScript source used by Vite.
 - `app.ts` is typed public UI behavior: language blocking, back button, hero slideshow and mobile navigation.
 - `cms.ts` is the transitional public CMS loader. It is restored to readable UTF-8 and will be split into typed modules next.
 - `cmsContent.ts` contains typed rendering for public CMS text sections: hero, body, named blocks and extra blocks.
+- `cmsFallbacks.ts` contains baseline public text shown only when Supabase has no published section for a page.
 - `cmsMedia.ts` contains typed rendering for public CMS media: schedule files, documents, galleries and lightbox.
 - `cmsNews.ts` contains typed public news loading and news-card rendering.
 - `cmsRouting.ts` contains typed public page-key and language detection for CMS pages.
