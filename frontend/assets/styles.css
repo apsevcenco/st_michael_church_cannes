@@ -1200,6 +1200,32 @@ h6 {
   color: #17120a;
 }
 
+.admin-actions button:disabled {
+  cursor: wait;
+  opacity: 0.85;
+}
+
+.admin-actions button.is-saving {
+  border-color: #0f5f8d;
+  background: #dff2ff;
+  color: #083c5c;
+  box-shadow: 0 0 0 3px rgba(27, 128, 184, 0.14);
+}
+
+.admin-actions button.is-success {
+  border-color: #178145;
+  background: #daf6e6;
+  color: #07562a;
+  box-shadow: 0 0 0 3px rgba(23, 129, 69, 0.16);
+}
+
+.admin-actions button.is-error {
+  border-color: #b42318;
+  background: #ffe3df;
+  color: #8a130b;
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.14);
+}
+
 .admin-list {
   display: grid;
   gap: 10px;

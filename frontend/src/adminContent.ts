@@ -1,4 +1,5 @@
 import { createRichTextEditor } from "./adminRichText";
+import { buttonFeedback } from "./adminFeedback";
 import { escapeHtml } from "./shared";
 import type { AdminSectionConfig, ContentSection, LanguageCode } from "./types";
 
@@ -180,9 +181,14 @@ export function createAdminContent(options: AdminContentOptions) {
 
   const save = async (event: Event): Promise<void> => {
     event.preventDefault();
+    const feedback = buttonFeedback(event, requiredElement<HTMLButtonElement>(options.$, "save-content-button"));
+    feedback.start();
     richEditors.forEach((editor) => editor.syncToTextarea());
     const client = options.getClient();
-    if (!client || !hasEditor()) return;
+    if (!client || !hasEditor()) {
+      feedback.fail("Недоступно");
+      return;
+    }
 
     const existing = contentRecords.find((item) => item.section_key === activeBlock);
     const id = fields.id.value || existing?.id;
@@ -193,11 +199,13 @@ export function createAdminContent(options: AdminContentOptions) {
     const { error } = await query;
     if (error) {
       options.setText("editor-status", `Ошибка сохранения текста: ${error.message}`);
+      feedback.fail("Ошибка");
       return;
     }
 
     await loadRecords();
     options.setText("editor-status", "Текст сохранен.");
+    feedback.success();
   };
 
   const remove = async (): Promise<void> => {

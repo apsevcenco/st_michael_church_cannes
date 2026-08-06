@@ -1,4 +1,5 @@
 import { MEDIA_BUCKET, fileExtension, slugify, validateUploadFile } from "./adminConfig";
+import { buttonFeedback } from "./adminFeedback";
 import { createRichTextEditor } from "./adminRichText";
 import { escapeHtml } from "./shared";
 import type { AdminSectionConfig, LanguageCode, ParishNews, ParishNewsPhoto } from "./types";
@@ -193,13 +194,19 @@ export function createAdminNews(options: AdminNewsOptions) {
 
   const save = async (event: Event): Promise<void> => {
     event.preventDefault();
+    const feedback = buttonFeedback(event, requiredElement<HTMLButtonElement>(options.$, "save-news-button"));
+    feedback.start();
     richEditors.forEach((editor) => editor.syncToTextarea());
     const client = options.getClient();
-    if (!client || !isNewsSection()) return;
+    if (!client || !isNewsSection()) {
+      feedback.fail("Недоступно");
+      return;
+    }
 
     const nextPayload = payload();
     if (!nextPayload.title || !nextPayload.event_date) {
       options.setText("editor-status", "У новости должны быть дата и заголовок.");
+      feedback.fail("Заполните поля");
       return;
     }
 
@@ -208,12 +215,14 @@ export function createAdminNews(options: AdminNewsOptions) {
       const { error } = await client.from("parish_news").update(nextPayload).eq("id", id);
       if (error) {
         options.setText("editor-status", `Ошибка сохранения новости: ${error.message}`);
+        feedback.fail("Ошибка");
         return;
       }
     } else {
       const { data, error } = await client.from("parish_news").insert(nextPayload).select("id").single();
       if (error) {
         options.setText("editor-status", `Ошибка создания новости: ${error.message}`);
+        feedback.fail("Ошибка");
         return;
       }
       id = data.id;
@@ -221,11 +230,15 @@ export function createAdminNews(options: AdminNewsOptions) {
     }
 
     const photosOk = await uploadPhotos(id);
-    if (!photosOk) return;
+    if (!photosOk) {
+      feedback.fail("Ошибка фото");
+      return;
+    }
 
     await loadRecords();
     clearForm();
     options.setText("editor-status", "Новость сохранена.");
+    feedback.success();
   };
 
   const remove = async (): Promise<void> => {

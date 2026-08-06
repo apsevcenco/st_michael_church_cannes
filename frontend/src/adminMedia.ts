@@ -1,3 +1,4 @@
+import { buttonFeedback } from "./adminFeedback";
 import { MEDIA_BUCKET, fileExtension, slugify, validateUploadFile } from "./adminConfig";
 import { escapeHtml } from "./shared";
 import type { AdminSectionConfig, MediaFile } from "./types";
@@ -236,9 +237,14 @@ export function createAdminMedia(options: AdminMediaOptions) {
 
   const save = async (event: Event): Promise<void> => {
     event.preventDefault();
+    const feedback = buttonFeedback(event, requiredElement<HTMLButtonElement>(options.$, "save-media-button"));
+    feedback.start("Сохраняем...");
     const client = options.getClient();
     const section = options.getSection();
-    if (!client || !hasEditor()) return;
+    if (!client || !hasEditor()) {
+      feedback.fail("Недоступно");
+      return;
+    }
 
     const files = Array.from(fields.file.files || []);
     const file = files[0];
@@ -247,7 +253,9 @@ export function createAdminMedia(options: AdminMediaOptions) {
     let storagePath = current ? current.storage_path || "" : "";
 
     if (section.imagesOnly && !fields.id.value && files.length > 1) {
-      await saveMultipleImages(files);
+      const ok = await saveMultipleImages(files);
+      if (ok) feedback.success("Загружено");
+      else feedback.fail("Ошибка");
       return;
     }
 
@@ -255,14 +263,17 @@ export function createAdminMedia(options: AdminMediaOptions) {
       const validation = validateUploadFile(file, section);
       if (!validation.ok) {
         options.setText("editor-status", validation.message || "Файл не прошел проверку.");
+        feedback.fail("Проверьте файл");
         return;
       }
       if (section.imagesOnly && !file.type.startsWith("image/")) {
         options.setText("editor-status", "В раздел «Галерея» можно загружать только фотографии.");
+        feedback.fail("Не фото");
         return;
       }
       if (section.pdfOnly && !isPdfFile(file)) {
         options.setText("editor-status", "В расписание можно загрузить только PDF-файл.");
+        feedback.fail("Не PDF");
         return;
       }
 
@@ -276,6 +287,7 @@ export function createAdminMedia(options: AdminMediaOptions) {
 
       if (uploadError) {
         options.setText("editor-status", `Ошибка загрузки файла: ${uploadError.message}`);
+        feedback.fail("Ошибка загрузки");
         return;
       }
 
@@ -285,6 +297,7 @@ export function createAdminMedia(options: AdminMediaOptions) {
 
     if (!publicUrl) {
       options.setText("editor-status", "Выберите файл для загрузки.");
+      feedback.fail("Выберите файл");
       return;
     }
 
@@ -295,12 +308,14 @@ export function createAdminMedia(options: AdminMediaOptions) {
     const { error } = await query;
     if (error) {
       options.setText("editor-status", `Ошибка сохранения файла: ${error.message}`);
+      feedback.fail("Ошибка");
       return;
     }
 
     clearForm();
     await loadRecords();
     options.setText("editor-status", "Файл сохранен.");
+    feedback.success("Сохранено");
   };
 
   const remove = async (): Promise<void> => {
