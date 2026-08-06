@@ -68,6 +68,7 @@ export interface PageVisit {
   session_id: string | null;
   referrer: string | null;
   user_agent: string | null;
+  visit_date?: string | null;
   created_at: string;
 }
 

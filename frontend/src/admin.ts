@@ -6,7 +6,7 @@ import { createAdminContent } from "./adminContent";
 import { adminSections } from "./adminConfig";
 import { createAdminMedia } from "./adminMedia";
 import { createAdminNews } from "./adminNews";
-import { escapeHtml } from "./shared";
+import { createAdminStats } from "./adminStats";
 import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
 
 (function () {
@@ -44,6 +44,13 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     getClient: () => client,
     getSection: () => activeSection,
     getLanguage: () => activeLanguage
+  });
+
+  const stats = createAdminStats({
+    $,
+    setText,
+    getClient: () => client,
+    getSection: () => activeSection
   });
 
   function showWorkspace(email) {
@@ -125,86 +132,7 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     }
     await Promise.all(jobs);
     if (activeSection.newsManager) await news.loadRecords();
-    if (activeSection.statsManager) await loadStats();
-  }
-
-  function formatStatsDate(value) {
-    if (!value) return "";
-    try {
-      return new Intl.DateTimeFormat("ru-RU", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      }).format(new Date(value));
-    } catch (_) {
-      return value;
-    }
-  }
-
-  function renderStatsRows(targetId, rows, emptyText) {
-    const target = $(targetId);
-    if (!target) return;
-    if (!rows.length) {
-      target.innerHTML = `<div class="admin-empty">${escapeHtml(emptyText)}</div>`;
-      return;
-    }
-    target.innerHTML = rows.map((row) => `
-      <div class="stats-row">
-        <span>${escapeHtml(row.label)}</span>
-        <strong>${escapeHtml(row.value)}</strong>
-      </div>
-    `).join("");
-  }
-
-  async function loadStats() {
-    if (!client || !activeSection.statsManager) return;
-    const since = new Date();
-    since.setDate(since.getDate() - 30);
-
-    const { data, error } = await client
-      .from("page_visits")
-      .select("created_at, visit_date, page_key, page_path, language, session_id")
-      .gte("created_at", since.toISOString())
-      .order("created_at", { ascending: false })
-      .limit(5000);
-
-    if (error) {
-      setText("editor-status", `Ошибка чтения статистики: ${error.message}`);
-      renderStatsRows("stats-top-pages", [], "Статистика пока недоступна.");
-      renderStatsRows("stats-recent", [], "Статистика пока недоступна.");
-      return;
-    }
-
-    const visits = data || [];
-    const today = new Date().toISOString().slice(0, 10);
-    const uniqueSessions = new Set(visits.map((visit) => visit.session_id).filter(Boolean));
-    const pages = new Map();
-
-    visits.forEach((visit) => {
-      const label = visit.page_path || visit.page_key || "unknown";
-      pages.set(label, (pages.get(label) || 0) + 1);
-    });
-
-    setText("stats-today", String(visits.filter((visit) => visit.visit_date === today).length));
-    setText("stats-total", String(visits.length));
-    setText("stats-unique", String(uniqueSessions.size));
-    setText("stats-pages", String(pages.size));
-
-    const topPages = Array.from(pages.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([label, value]) => ({ label, value: `${value}` }));
-
-    const recent = visits.slice(0, 12).map((visit) => ({
-      label: `${visit.page_path || visit.page_key || "unknown"} · ${visit.language || "ru"}`,
-      value: formatStatsDate(visit.created_at)
-    }));
-
-    renderStatsRows("stats-top-pages", topPages, "Посещений пока нет.");
-    renderStatsRows("stats-recent", recent, "Посещений пока нет.");
-    setText("editor-status", "Статистика обновлена.");
+    if (activeSection.statsManager) await stats.load();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -228,12 +156,12 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     content.bindEvents();
     media.bindEvents();
     news.bindEvents();
+    stats.bindEvents();
     auth.checkSession();
 
     document.querySelectorAll(".admin-language-switch button").forEach((button) => {
       button.addEventListener("click", () => selectLanguage(button.dataset.language));
     });
 
-    $("refresh-stats-button").addEventListener("click", loadStats);
   });
 })();
