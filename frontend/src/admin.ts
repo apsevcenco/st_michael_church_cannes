@@ -1,6 +1,7 @@
 ﻿// @ts-nocheck
 
 import "./site-config";
+import { createAdminAuth } from "./adminAuth";
 import { MEDIA_BUCKET, adminSections, fileExtension, slugify, validateUploadFile } from "./adminConfig";
 import { escapeHtml } from "./shared";
 import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, ParishNews, ParishNewsPhoto } from "./types";
@@ -59,31 +60,6 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     if (node) node.textContent = text;
   }
 
-  async function isCurrentUserAdmin(user) {
-    if (!client || !user) return false;
-    const { data, error } = await client
-      .from("admin_users")
-      .select("user_id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    return !error && Boolean(data);
-  }
-
-  async function requireAdminSession(user) {
-    if (await isCurrentUserAdmin(user)) return true;
-    await client.auth.signOut();
-    setText("auth-status", "Доступ запрещен: пользователь не добавлен в список администраторов.");
-    showLogin();
-    return false;
-  }
-
-  function showLogin() {
-    document.body.classList.add("is-login");
-    document.body.classList.remove("is-authenticated");
-    $("login-screen").hidden = false;
-    $("admin-workspace").hidden = true;
-  }
-
   function showWorkspace(email) {
     document.body.classList.remove("is-login");
     document.body.classList.add("is-authenticated");
@@ -91,24 +67,6 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
     $("admin-workspace").hidden = false;
     setText("admin-user-email", email || "");
     loadSectionData();
-  }
-
-  function connect() {
-    if (!window.supabase || !window.ST_MICHAEL_SUPABASE_URL || !window.ST_MICHAEL_SUPABASE_ANON_KEY) {
-      setText("auth-status", "Не удалось подключить сайт к Supabase. Проверьте настройки проекта.");
-      return false;
-    }
-
-    client = window.supabase.createClient(window.ST_MICHAEL_SUPABASE_URL, window.ST_MICHAEL_SUPABASE_ANON_KEY);
-    return true;
-  }
-
-  async function checkSession() {
-    if (!client) return;
-    const { data } = await client.auth.getSession();
-    const user = data.session && data.session.user;
-    if (user && await requireAdminSession(user)) showWorkspace(user.email);
-    else showLogin();
   }
 
   function renderSectionMenu() {
@@ -857,33 +815,24 @@ import type { AdminSectionConfig, ContentSection, LanguageCode, MediaFile, Paris
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    if (!connect()) return;
+    const auth = createAdminAuth({
+      $,
+      setText,
+      getClient: () => client,
+      setClient: (nextClient) => {
+        client = nextClient;
+      },
+      onWorkspaceReady: showWorkspace
+    });
+
+    if (!auth.connect()) return;
 
     renderSectionMenu();
     renderSectionHeader();
     renderBlockTabs();
     renderMediaPurposes();
-    checkSession();
-
-    $("login-form").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const { data, error } = await client.auth.signInWithPassword({
-        email: $("admin-email").value.trim(),
-        password: $("admin-password").value
-      });
-
-      if (error) {
-        setText("auth-status", `Ошибка входа: ${error.message}`);
-        return;
-      }
-
-      if (await requireAdminSession(data.user)) showWorkspace(data.user.email);
-    });
-
-    $("logout-button").addEventListener("click", async () => {
-      await client.auth.signOut();
-      showLogin();
-    });
+    auth.bindEvents();
+    auth.checkSession();
 
     document.querySelectorAll(".admin-language-switch button").forEach((button) => {
       button.addEventListener("click", () => selectLanguage(button.dataset.language));
