@@ -1,3 +1,7 @@
+// @ts-nocheck
+
+import "./site-config";
+
 (function () {
   const MEDIA_BUCKET = "parish-media";
   const MAX_IMAGE_SIZE = 8 * 1024 * 1024;

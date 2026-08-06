@@ -23,7 +23,7 @@
 - `contacts.html` — контакты.
 - `news.html` — новости.
 
-Французская и английская версии временно закрыты на уровне общего скрипта `frontend/assets/app.js`.
+Французская и английская версии временно закрыты на уровне общего скрипта `frontend/src/app.ts`.
 
 ## Админ-панель
 
@@ -32,7 +32,7 @@
 - локально: `frontend/admin.html`;
 - на Render: `/admin.html`.
 
-Вход выполняется через Supabase Auth по email и паролю. Экран подключения Supabase из админки убран; параметры проекта задаются в `frontend/assets/site-config.js`.
+Вход выполняется через Supabase Auth по email и паролю. Экран подключения Supabase из админки убран; параметры проекта задаются в `frontend/src/site-config.ts`.
 
 Админ-панель управляет:
 
@@ -60,6 +60,13 @@ Security hardening:
 - after applying migrations, add the real admin email to `public.admin_users`.
 
 ## Render
+
+Frontend теперь собирается через Vite + TypeScript:
+
+- исходники скриптов находятся в `frontend/src/`;
+- локальная проверка типов: `npm run check`;
+- production-сборка: `npm run build`;
+- Render публикует собранную папку `frontend/dist`.
 
 Blueprint поднимает два сервиса:
 

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 (function () {
   var currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var blockedLanguagePage = currentPage === 'fr.html' || currentPage === 'en.html' || /-(fr|en)\.html$/.test(currentPage);

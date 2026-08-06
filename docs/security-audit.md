@@ -45,7 +45,7 @@ where email = 'OLD_ADMIN_EMAIL@example.com';
 - Every admin account should use a strong unique password.
 - Enable MFA for admin users if available on the Supabase plan.
 - Never expose `service_role` keys in frontend code, GitHub or Render frontend env.
-- Keep only the anon public key in `frontend/assets/site-config.js`.
+- Keep only the anon public key in `frontend/src/site-config.ts`.
 - Rotate leaked credentials immediately in Supabase Dashboard.
 
 ## Storage policy

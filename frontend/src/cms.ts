@@ -1,3 +1,7 @@
+// @ts-nocheck
+
+import "./site-config";
+
 (function () {
   const pageMap = {
     "index.html": "home",
