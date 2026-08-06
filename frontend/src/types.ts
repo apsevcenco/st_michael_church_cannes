@@ -50,7 +50,12 @@ export interface ParishNews {
 export interface ParishNewsPhoto {
   id: string;
   news_id: string;
+  title?: string | null;
   file_url: string | null;
+  storage_path?: string | null;
+  file_name?: string | null;
+  mime_type?: string | null;
+  file_size?: number | null;
   description: string | null;
   sort_order: number;
 }

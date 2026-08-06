@@ -9,6 +9,7 @@ This folder contains the TypeScript source used by Vite.
 - `adminContent.ts` contains typed content-section editing: block tabs, text form, loading, saving and deleting.
 - `adminConfig.ts` contains admin section configuration, upload limits, storage constants and upload validation.
 - `adminMedia.ts` contains typed media editing: purpose selector, uploads to Supabase Storage, multi-image galleries and deletion.
+- `adminNews.ts` contains typed parish news editing: calendar date, text, news photos, saving and deletion.
 - `shared.ts` contains reusable HTML, URL and date helpers used by public CMS and admin code.
 - `types.ts` contains the shared CMS, media, news, visit and admin section contracts.
 - `site-config.ts` contains the public Supabase URL and anon key.
