@@ -156,7 +156,12 @@ export function createRichTextEditor(textarea: HTMLTextAreaElement): RichTextEdi
 
   wrapper.append(toolbar, editor);
   textarea.hidden = true;
-  textarea.insertAdjacentElement("beforebegin", wrapper);
+  const ownerLabel = textarea.closest("label");
+  if (ownerLabel && ownerLabel.parentElement) {
+    ownerLabel.insertAdjacentElement("afterend", wrapper);
+  } else {
+    textarea.insertAdjacentElement("beforebegin", wrapper);
+  }
 
   function syncToTextarea(): void {
     textarea.value = sanitizeRichTextHtml(editor.innerHTML).trim();
