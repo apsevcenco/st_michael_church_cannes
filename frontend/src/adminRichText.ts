@@ -6,15 +6,15 @@ interface RichTextEditor {
 }
 
 const fontOptions = [
-  ["", "Обычный"],
+  ["", "Default"],
   ["Arial", "Arial"],
   ["Georgia", "Georgia"],
   ["Times New Roman", "Times"],
-  ["Oglavie, Georgia, serif", "Церковный"]
+  ["Oglavie, Georgia, serif", "Church"]
 ];
 
 const sizeOptions = [
-  ["", "Размер"],
+  ["", "Size"],
   ["13px", "13"],
   ["15px", "15"],
   ["17px", "17"],
@@ -26,34 +26,11 @@ const sizeOptions = [
 ];
 
 const blockOptions = [
-  ["P", "Абзац"],
-  ["H2", "Заголовок"],
-  ["H3", "Подзаголовок"],
-  ["BLOCKQUOTE", "Цитата"]
+  ["P", "Paragraph"],
+  ["H2", "Heading"],
+  ["H3", "Subheading"],
+  ["BLOCKQUOTE", "Quote"]
 ];
-
-function makeButton(label: string, title: string, command: string, value?: string): HTMLButtonElement {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.textContent = label;
-  button.title = title;
-  button.addEventListener("click", () => {
-    document.execCommand(command, false, value);
-  });
-  return button;
-}
-
-function makeLinkButton(): HTMLButtonElement {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.textContent = "Link";
-  button.title = "Ссылка";
-  button.addEventListener("click", () => {
-    const url = window.prompt("Введите ссылку");
-    if (url) document.execCommand("createLink", false, url);
-  });
-  return button;
-}
 
 function makeSelect(options: string[][], title: string, onChange: (value: string) => void): HTMLSelectElement {
   const select = document.createElement("select");
@@ -74,67 +51,139 @@ export function createRichTextEditor(textarea: HTMLTextAreaElement): RichTextEdi
 
   const toolbar = document.createElement("div");
   toolbar.className = "rich-toolbar";
-  toolbar.addEventListener("mousedown", (event) => {
-    if (event.target instanceof HTMLButtonElement) event.preventDefault();
-  });
-
-  const fontSelect = makeSelect(fontOptions, "Шрифт", (value) => {
-    if (value) document.execCommand("fontName", false, value);
-  });
 
   const editor = document.createElement("div");
   editor.className = "rich-editable";
-  if (textarea.classList.contains("admin-large-textarea")) wrapper.classList.add("is-large");
   editor.contentEditable = "true";
-  editor.innerHTML = richTextToHtml(textarea.value);
+  editor.tabIndex = 0;
+  editor.setAttribute("role", "textbox");
+  editor.setAttribute("aria-multiline", "true");
+  if (textarea.classList.contains("admin-large-textarea")) wrapper.classList.add("is-large");
+  editor.innerHTML = richTextToHtml(textarea.value) || "<p><br></p>";
 
-  const sizeSelect = makeSelect(sizeOptions, "Размер букв", (value) => {
+  let savedRange: Range | null = null;
+
+  const saveSelection = (): void => {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    if (editor.contains(range.commonAncestorContainer)) savedRange = range.cloneRange();
+  };
+
+  const restoreSelection = (): void => {
+    editor.focus();
+    const selection = window.getSelection();
+    if (!selection) return;
+    selection.removeAllRanges();
+    if (savedRange) {
+      selection.addRange(savedRange);
+      return;
+    }
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    selection.addRange(range);
+    savedRange = range.cloneRange();
+  };
+
+  const runCommand = (command: string, value?: string): void => {
+    restoreSelection();
+    document.execCommand(command, false, value);
+    saveSelection();
+    syncToTextarea();
+  };
+
+  const makeButton = (label: string, title: string, command: string, value?: string): HTMLButtonElement => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+    button.title = title;
+    button.addEventListener("mousedown", (event) => event.preventDefault());
+    button.addEventListener("click", () => runCommand(command, value));
+    return button;
+  };
+
+  const makeLinkButton = (): HTMLButtonElement => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "Link";
+    button.title = "Link";
+    button.addEventListener("mousedown", (event) => event.preventDefault());
+    button.addEventListener("click", () => {
+      restoreSelection();
+      const url = window.prompt("Enter link");
+      if (url) runCommand("createLink", url);
+    });
+    return button;
+  };
+
+  const fontSelect = makeSelect(fontOptions, "Font", (value) => {
+    if (value) runCommand("fontName", value);
+  });
+
+  const sizeSelect = makeSelect(sizeOptions, "Font size", (value) => {
     if (!value) return;
+    restoreSelection();
     document.execCommand("fontSize", false, "7");
     editor.querySelectorAll("font[size='7']").forEach((node) => {
       const element = node as HTMLElement;
       element.removeAttribute("size");
       element.style.fontSize = value;
     });
+    saveSelection();
+    syncToTextarea();
   });
 
-  const blockSelect = makeSelect(blockOptions, "Стиль", (value) => {
-    document.execCommand("formatBlock", false, value);
+  const blockSelect = makeSelect(blockOptions, "Style", (value) => {
+    runCommand("formatBlock", value);
   });
 
   toolbar.append(
     fontSelect,
     sizeSelect,
     blockSelect,
-    makeButton("B", "Жирный", "bold"),
-    makeButton("I", "Курсив", "italic"),
-    makeButton("U", "Подчеркнуть", "underline"),
-    makeButton("List", "Маркированный список", "insertUnorderedList"),
-    makeButton("1.", "Нумерованный список", "insertOrderedList"),
-    makeButton("Left", "По левому краю", "justifyLeft"),
-    makeButton("Center", "По центру", "justifyCenter"),
-    makeButton("Right", "По правому краю", "justifyRight"),
+    makeButton("B", "Bold", "bold"),
+    makeButton("I", "Italic", "italic"),
+    makeButton("U", "Underline", "underline"),
+    makeButton("List", "Bullet list", "insertUnorderedList"),
+    makeButton("1.", "Numbered list", "insertOrderedList"),
+    makeButton("Left", "Align left", "justifyLeft"),
+    makeButton("Center", "Align center", "justifyCenter"),
+    makeButton("Right", "Align right", "justifyRight"),
     makeLinkButton(),
-    makeButton("Clear", "Убрать формат", "removeFormat")
+    makeButton("Clear", "Remove formatting", "removeFormat")
   );
 
   wrapper.append(toolbar, editor);
   textarea.hidden = true;
   textarea.insertAdjacentElement("beforebegin", wrapper);
 
-  const syncToTextarea = (): void => {
+  function syncToTextarea(): void {
     textarea.value = sanitizeRichTextHtml(editor.innerHTML).trim();
-  };
+  }
 
-  editor.addEventListener("input", syncToTextarea);
+  editor.addEventListener("mousedown", () => {
+    if (!editor.innerHTML.trim()) editor.innerHTML = "<p><br></p>";
+  });
+  editor.addEventListener("focus", saveSelection);
+  editor.addEventListener("mouseup", saveSelection);
+  editor.addEventListener("keyup", saveSelection);
+  editor.addEventListener("input", () => {
+    saveSelection();
+    syncToTextarea();
+  });
   editor.addEventListener("blur", syncToTextarea);
   editor.addEventListener("paste", () => {
-    window.setTimeout(syncToTextarea, 0);
+    window.setTimeout(() => {
+      saveSelection();
+      syncToTextarea();
+    }, 0);
   });
 
   return {
     setValue(value: string): void {
-      editor.innerHTML = richTextToHtml(value);
+      editor.innerHTML = richTextToHtml(value) || "<p><br></p>";
+      savedRange = null;
       syncToTextarea();
     },
     syncToTextarea
