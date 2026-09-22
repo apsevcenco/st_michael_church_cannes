@@ -66,10 +66,23 @@ export interface PageVisit {
   page_path: string;
   language: LanguageCode;
   session_id: string | null;
+  visitor_id?: string | null;
   referrer: string | null;
   user_agent: string | null;
   visit_date?: string | null;
   created_at: string;
+  is_new_session?: boolean | null;
+  first_seen_at?: string | null;
+  landing_page?: string | null;
+  timezone?: string | null;
+  visitor_language?: string | null;
+  country_code?: string | null;
+  country_name?: string | null;
+  device_type?: string | null;
+  browser_name?: string | null;
+  os_name?: string | null;
+  screen_width?: number | null;
+  screen_height?: number | null;
 }
 
 export interface AdminSectionConfig {
