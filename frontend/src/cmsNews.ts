@@ -33,6 +33,14 @@ function newsDetailUrl(id: string, language: LanguageCode): string {
   return `news-detail${suffix}.html?id=${encodeURIComponent(id)}`;
 }
 
+function syncDetailLanguageLinks(id: string): void {
+  document.querySelectorAll<HTMLAnchorElement>(".church-lang-switch a").forEach((link) => {
+    const href = link.getAttribute("href") || "";
+    if (!href.startsWith("news-detail")) return;
+    link.href = `${href.split("?")[0]}?id=${encodeURIComponent(id)}`;
+  });
+}
+
 function renderNewsCard(item: ParishNews, photos: ParishNewsPhoto[], language: LanguageCode): string {
   const safePhotos = (photos || [])
     .map((photo) => ({ ...photo, safe_url: safePublicUrl(photo.file_url) }))
@@ -79,6 +87,38 @@ function renderNewsDetail(item: ParishNews, photos: ParishNewsPhoto[], language:
   }
 }
 
+async function resolveTranslatedNewsDetail(client: SupabaseClient, id: string, language: LanguageCode): Promise<ParishNews | null> {
+  const { data: direct } = await client
+    .from("parish_news")
+    .select("*")
+    .eq("id", id)
+    .eq("language", language)
+    .eq("status", "published")
+    .maybeSingle();
+
+  if (direct) return direct as ParishNews;
+
+  const { data: source } = await client
+    .from("parish_news")
+    .select("id, translation_group_id")
+    .eq("id", id)
+    .eq("status", "published")
+    .maybeSingle();
+
+  const groupId = source?.translation_group_id || source?.id;
+  if (!groupId) return null;
+
+  const { data: translated } = await client
+    .from("parish_news")
+    .select("*")
+    .eq("translation_group_id", groupId)
+    .eq("language", language)
+    .eq("status", "published")
+    .maybeSingle();
+
+  return (translated || null) as ParishNews | null;
+}
+
 async function loadNewsDetail(client: SupabaseClient, language: LanguageCode): Promise<void> {
   const detailNode = document.querySelector<HTMLElement>("[data-news-detail]");
   if (!detailNode) return;
@@ -88,16 +128,10 @@ async function loadNewsDetail(client: SupabaseClient, language: LanguageCode): P
     detailNode.innerHTML = `<p class="empty-public-message">${escapeHtml(notFoundLabels[language])}</p>`;
     return;
   }
+  syncDetailLanguageLinks(id);
 
-  const { data: item, error } = await client
-    .from("parish_news")
-    .select("*")
-    .eq("id", id)
-    .eq("language", language)
-    .eq("status", "published")
-    .single();
-
-  if (error || !item) {
+  const item = await resolveTranslatedNewsDetail(client, id, language);
+  if (!item) {
     detailNode.innerHTML = `<p class="empty-public-message">${escapeHtml(notFoundLabels[language])}</p>`;
     return;
   }
@@ -105,10 +139,10 @@ async function loadNewsDetail(client: SupabaseClient, language: LanguageCode): P
   const { data: photos } = await client
     .from("parish_news_photos")
     .select("*")
-    .eq("news_id", id)
+    .eq("news_id", item.id)
     .order("sort_order", { ascending: true });
 
-  renderNewsDetail(item as ParishNews, (photos || []) as ParishNewsPhoto[], language);
+  renderNewsDetail(item, (photos || []) as ParishNewsPhoto[], language);
 }
 
 export async function loadNews(client: SupabaseClient, language: LanguageCode): Promise<void> {
