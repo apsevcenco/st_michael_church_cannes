@@ -1,6 +1,7 @@
 import { MEDIA_BUCKET, fileExtension, slugify, validateUploadFile } from "./adminConfig";
 import { buttonFeedback } from "./adminFeedback";
 import { createRichTextEditor } from "./adminRichText";
+import { translateBlock } from "./adminTranslate";
 import { escapeHtml } from "./shared";
 import type { AdminSectionConfig, LanguageCode, ParishNews, ParishNewsPhoto } from "./types";
 
@@ -192,6 +193,117 @@ export function createAdminNews(options: AdminNewsOptions) {
     return true;
   };
 
+  const ensureTranslationGroup = async (sourceId: string): Promise<string> => {
+    const client = options.getClient();
+    const current = newsRecords.find((item) => item.id === sourceId);
+    const groupId = current?.translation_group_id || sourceId;
+    if (!current?.translation_group_id) {
+      const { error } = await client.from("parish_news").update({ translation_group_id: groupId }).eq("id", sourceId);
+      if (error) throw new Error(error.message);
+    }
+    return groupId;
+  };
+
+  const copyPhotosToTranslation = async (sourceId: string, targetId: string): Promise<void> => {
+    const client = options.getClient();
+    const sourcePhotos = newsPhotos.filter((photo) => photo.news_id === sourceId);
+    if (!sourcePhotos.length) return;
+
+    const { data: existingPhotos } = await client.from("parish_news_photos").select("id").eq("news_id", targetId).limit(1);
+    if (existingPhotos?.length) return;
+
+    const rows = sourcePhotos.map((photo) => ({
+      news_id: targetId,
+      title: photo.title || photo.file_name || "",
+      description: photo.description || "",
+      file_url: photo.file_url,
+      storage_path: photo.storage_path || null,
+      file_name: photo.file_name || null,
+      mime_type: photo.mime_type || null,
+      file_size: photo.file_size || null,
+      sort_order: photo.sort_order || 0,
+    }));
+
+    const { error } = await client.from("parish_news_photos").insert(rows);
+    if (error) throw new Error(error.message);
+  };
+
+  const saveTranslatedNews = async (language: LanguageCode, groupId: string, translated: Record<string, string>): Promise<void> => {
+    const client = options.getClient();
+    const sourceId = fields.id.value;
+    const nextPayload = {
+      translation_group_id: groupId,
+      language,
+      title: translated.title || "",
+      excerpt: translated.excerpt || "",
+      body: translated.body || "",
+      event_date: fields.date.value,
+      status: fields.status.value,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: existing, error: findError } = await client
+      .from("parish_news")
+      .select("id")
+      .eq("translation_group_id", groupId)
+      .eq("language", language)
+      .maybeSingle();
+
+    if (findError) throw new Error(findError.message);
+
+    if (existing?.id) {
+      const { error } = await client.from("parish_news").update(nextPayload).eq("id", existing.id);
+      if (error) throw new Error(error.message);
+      await copyPhotosToTranslation(sourceId, existing.id);
+      return;
+    }
+
+    const { data, error } = await client.from("parish_news").insert(nextPayload).select("id").single();
+    if (error) throw new Error(error.message);
+    await copyPhotosToTranslation(sourceId, data.id);
+  };
+
+  const translateCurrentNews = async (event: Event): Promise<void> => {
+    const feedback = buttonFeedback(event, requiredElement<HTMLButtonElement>(options.$, "translate-news-button"));
+    feedback.start("Перевод...");
+    richEditors.forEach((editor) => editor.syncToTextarea());
+    const client = options.getClient();
+    if (!client || !isNewsSection()) {
+      feedback.fail("Недоступно");
+      return;
+    }
+    if (options.getLanguage() !== "ru") {
+      options.setText("editor-status", "Автоперевод новости запускается из русской вкладки RU.");
+      feedback.fail("Откройте RU");
+      return;
+    }
+    if (!fields.id.value) {
+      options.setText("editor-status", "Сначала сохраните русскую новость, затем запускайте перевод.");
+      feedback.fail("Сохраните RU");
+      return;
+    }
+
+    try {
+      const groupId = await ensureTranslationGroup(fields.id.value);
+      const translations = await translateBlock(client, "ru", "Новость прихода", {
+        title: fields.title.value.trim(),
+        excerpt: fields.excerpt.value.trim(),
+        body: fields.body.value.trim(),
+      });
+
+      for (const language of ["fr", "en"] as LanguageCode[]) {
+        if (translations[language]) await saveTranslatedNews(language, groupId, translations[language] || {});
+      }
+
+      await loadRecords();
+      options.setText("editor-status", "Новость переведена на FR/EN. Откройте языковые вкладки, чтобы проверить и поправить текст.");
+      feedback.success("Переведено");
+    } catch (error) {
+      options.setText("editor-status", `Ошибка перевода новости: ${error instanceof Error ? error.message : "неизвестная ошибка"}`);
+      feedback.fail("Ошибка");
+    }
+  };
+
   const save = async (event: Event): Promise<void> => {
     event.preventDefault();
     const feedback = buttonFeedback(event, requiredElement<HTMLButtonElement>(options.$, "save-news-button"));
@@ -227,6 +339,7 @@ export function createAdminNews(options: AdminNewsOptions) {
       }
       id = data.id;
       fields.id.value = id;
+      await client.from("parish_news").update({ translation_group_id: id }).eq("id", id);
     }
 
     const photosOk = await uploadPhotos(id);
@@ -270,6 +383,7 @@ export function createAdminNews(options: AdminNewsOptions) {
 
   const bindEvents = (): void => {
     requiredElement<HTMLFormElement>(options.$, "news-form").addEventListener("submit", save);
+    requiredElement<HTMLButtonElement>(options.$, "translate-news-button").addEventListener("click", translateCurrentNews);
     requiredElement<HTMLButtonElement>(options.$, "clear-news-button").addEventListener("click", clearForm);
     requiredElement<HTMLButtonElement>(options.$, "delete-news-button").addEventListener("click", remove);
   };
