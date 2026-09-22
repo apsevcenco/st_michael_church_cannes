@@ -176,8 +176,8 @@ export const adminSections: AdminSectionConfig[] = [
   },
   {
     key: "stats",
-    title: "Статистика",
-    description: "Базовая статистика посещений сайта за последние 30 дней.",
+    title: "Посещения",
+    description: "Полная аналитика посещений сайта: посетители, отказы, онлайн, страны, источники, страницы и устройства.",
     blocks: [],
     media: [],
     statsManager: true
