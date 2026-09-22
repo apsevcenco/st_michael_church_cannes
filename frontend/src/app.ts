@@ -6,10 +6,6 @@ function getCurrentPage(): PageName {
   return (window.location.pathname.split("/").pop() || "index.html").toLowerCase() as PageName;
 }
 
-function isBlockedLanguagePage(page: string): boolean {
-  return page === "fr.html" || page === "en.html" || /-(fr|en)\.html$/.test(page);
-}
-
 function pageFromHref(href: string | null): string {
   return String(href || "")
     .split("#")[0]
@@ -25,15 +21,25 @@ function pageHomeFor(file: string): string {
   return "index.html";
 }
 
-function blockDisabledLanguageLinks(): void {
-  document.querySelectorAll<HTMLAnchorElement>(".church-lang-switch a").forEach((link) => {
-    if (!isBlockedLanguagePage(pageFromHref(link.getAttribute("href")))) return;
+function loadLanguageHeadingFont(): void {
+  const language = document.documentElement.lang;
+  if (language !== "fr" && language !== "en") return;
+  if (document.querySelector('link[href="assets/language-fonts.css"]')) return;
 
-    link.classList.add("lang-disabled");
-    link.setAttribute("aria-disabled", "true");
-    link.setAttribute("title", "Временно недоступно");
-    link.removeAttribute("href");
-    link.addEventListener("click", (event) => event.preventDefault());
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "assets/language-fonts.css";
+  document.head.appendChild(link);
+}
+
+function normalizeLanguageLinks(): void {
+  document.querySelectorAll<HTMLAnchorElement>(".church-lang-switch a, .nav-lang-row a").forEach((link) => {
+    const targetPage = pageFromHref(link.getAttribute("href"));
+    if (!targetPage) return;
+
+    link.classList.remove("lang-disabled");
+    link.removeAttribute("aria-disabled");
+    link.removeAttribute("title");
   });
 }
 
@@ -120,11 +126,8 @@ function setupMobileMenu(): void {
   });
 }
 
-if (isBlockedLanguagePage(currentPage)) {
-  window.location.replace("index.html");
-} else {
-  blockDisabledLanguageLinks();
-  addBackButton();
-  setupHeroSlideshow();
-  setupMobileMenu();
-}
+loadLanguageHeadingFont();
+normalizeLanguageLinks();
+addBackButton();
+setupHeroSlideshow();
+setupMobileMenu();
