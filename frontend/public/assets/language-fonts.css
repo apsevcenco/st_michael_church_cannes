@@ -34,6 +34,13 @@ html[lang="en"] .schedule-poster::after {
   font-family: var(--church-heading-font);
 }
 
+html[lang="fr"] .link-grid a,
+html[lang="fr"] .link-grid-locked,
+html[lang="en"] .link-grid a,
+html[lang="en"] .link-grid-locked {
+  font-size: clamp(15px, 1.5vw, 20px);
+}
+
 html[lang="fr"] .brand strong,
 html[lang="en"] .brand strong {
   font-size: clamp(18px, 2vw, 24px);
