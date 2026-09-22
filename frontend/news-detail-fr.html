@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Actualité paroissiale</title>
+    <meta name="description" content="Actualité complète de la paroisse Saint-Michel-Archange à Cannes.">
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="/src/cms.ts"></script>
+    <script type="module" src="/src/app.ts"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="fr.html" aria-label="Accueil">
+        <span class="brand-mark"><img src="assets/logo.jpg" alt="Saint Michel Archange"></span>
+        <span><strong>Saint Michel Archange</strong><small>Paroisse orthodoxe à Cannes</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Navigation"><a href="schedule-fr.html">Offices</a><a href="sacraments-fr.html">Sacrements</a><a href="history-fr.html">Histoire</a><a href="gallery-fr.html">Galerie</a><a href="visit-fr.html">Visiter</a><a href="help-fr.html">Aider</a><a href="contacts-fr.html">Contacts</a></nav>
+      <div class="lang-switch church-lang-switch" aria-label="Languages"><a href="news.html">🇷🇺</a><a class="active" href="news-fr.html">🇫🇷</a><a href="news-en.html">🇬🇧</a></div>
+    </header>
+    <main>
+      <button class="page-back" type="button" onclick="history.length > 1 ? history.back() : location.href='news-fr.html'">Retour</button>
+      <section class="page-hero"><p class="section-label">Nouvelles</p><h1 data-news-detail-title>Actualité paroissiale</h1></section>
+      <article class="section history-article" data-news-detail>
+        <time data-news-detail-date></time>
+        <div data-news-detail-body></div>
+        <div class="photo-gallery" data-news-detail-photos></div>
+      </article>
+    </main>
+    <footer class="site-footer"><p>© Paroisse Saint-Michel-Archange à Cannes</p><p><a href="news-fr.html">Toutes les nouvelles</a></p></footer>
+  </body>
+</html>
