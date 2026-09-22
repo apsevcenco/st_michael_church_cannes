@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ru">
   <head>
     <meta charset="utf-8">
@@ -134,27 +134,73 @@
             </article>
 
             <p class="admin-status" id="editor-status">Готово к работе.</p>
-            <article class="admin-panel" id="stats-admin-panel" hidden>
+            <article class="admin-panel stats-dashboard" id="stats-admin-panel" hidden>
               <div class="stats-header">
-                <h2>Статистика посещений</h2>
-                <button type="button" id="refresh-stats-button">Обновить</button>
+                <div>
+                  <h2>Посещения сайта</h2>
+                  <p>Аналитика строится по данным Supabase. Онлайн считается по активности за последние 5 минут.</p>
+                </div>
+                <div class="stats-controls">
+                  <label>Период
+                    <select id="stats-period-select">
+                      <option value="7">7 дней</option>
+                      <option value="30" selected>30 дней</option>
+                      <option value="90">90 дней</option>
+                      <option value="180">180 дней</option>
+                    </select>
+                  </label>
+                  <button type="button" id="refresh-stats-button">Обновить</button>
+                </div>
               </div>
-              <div class="stats-grid">
+
+              <div class="stats-grid stats-grid-wide">
                 <div class="stats-card"><span>Сегодня</span><strong id="stats-today">0</strong></div>
-                <div class="stats-card"><span>30 дней</span><strong id="stats-total">0</strong></div>
+                <div class="stats-card"><span>За период</span><strong id="stats-total">0</strong></div>
                 <div class="stats-card"><span>Уникальные</span><strong id="stats-unique">0</strong></div>
-                <div class="stats-card"><span>Страниц</span><strong id="stats-pages">0</strong></div>
+                <div class="stats-card"><span>Сейчас онлайн</span><strong id="stats-online">0</strong></div>
+                <div class="stats-card"><span>Новые</span><strong id="stats-new">0</strong></div>
+                <div class="stats-card"><span>Постоянные</span><strong id="stats-returning">0</strong></div>
+                <div class="stats-card"><span>Отказы</span><strong id="stats-bounce">0</strong></div>
+                <div class="stats-card"><span>Процент отказов</span><strong id="stats-bounce-rate">0%</strong></div>
+                <div class="stats-card"><span>Страниц смотрели</span><strong id="stats-pages">0</strong></div>
               </div>
-              <div class="stats-columns">
+
+              <section class="stats-chart-panel">
+                <h3>Динамика посещений</h3>
+                <div class="stats-daily-chart" id="stats-daily"></div>
+              </section>
+
+              <div class="stats-columns stats-columns-three">
                 <section>
                   <h3>Популярные страницы</h3>
                   <div class="stats-table" id="stats-top-pages"></div>
                 </section>
                 <section>
-                  <h3>Последние посещения</h3>
-                  <div class="stats-table" id="stats-recent"></div>
+                  <h3>Страны</h3>
+                  <div class="stats-table" id="stats-countries"></div>
+                </section>
+                <section>
+                  <h3>Источники переходов</h3>
+                  <div class="stats-table" id="stats-referrers"></div>
+                </section>
+                <section>
+                  <h3>Входные страницы</h3>
+                  <div class="stats-table" id="stats-entry-pages"></div>
+                </section>
+                <section>
+                  <h3>Устройства</h3>
+                  <div class="stats-table" id="stats-devices"></div>
+                </section>
+                <section>
+                  <h3>Языки браузера</h3>
+                  <div class="stats-table" id="stats-languages"></div>
                 </section>
               </div>
+
+              <section class="stats-chart-panel">
+                <h3>Последние посещения</h3>
+                <div class="stats-table" id="stats-recent"></div>
+              </section>
             </article>
           </section>
         </div>
