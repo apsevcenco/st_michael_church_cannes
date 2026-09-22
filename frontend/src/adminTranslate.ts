@@ -8,6 +8,18 @@ export function translationTargets(sourceLanguage: LanguageCode): LanguageCode[]
   return (["fr", "en"] as LanguageCode[]).filter((language) => language !== sourceLanguage);
 }
 
+async function readErrorPayload(response: Response): Promise<string> {
+  const text = await response.text().catch(() => "");
+  if (!text) return `HTTP ${response.status}`;
+
+  try {
+    const json = JSON.parse(text);
+    return json.error || json.message || text.slice(0, 240);
+  } catch {
+    return text.slice(0, 240);
+  }
+}
+
 export async function translateBlock(
   client: SupabaseClientLike,
   sourceLanguage: LanguageCode,
@@ -38,10 +50,16 @@ export async function translateBlock(
       context,
       fields,
     }),
+  }).catch((error) => {
+    throw new Error(`Backend недоступен: ${error instanceof Error ? error.message : "network error"}`);
   });
 
+  if (!response.ok) {
+    throw new Error(await readErrorPayload(response));
+  }
+
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok || !payload.ok) {
+  if (!payload.ok) {
     throw new Error(payload.error || "Ошибка автоматического перевода.");
   }
 
