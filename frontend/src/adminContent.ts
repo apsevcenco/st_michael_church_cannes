@@ -1,5 +1,6 @@
 import { createRichTextEditor } from "./adminRichText";
 import { buttonFeedback } from "./adminFeedback";
+import { translateBlock } from "./adminTranslate";
 import { escapeHtml } from "./shared";
 import type { AdminSectionConfig, ContentSection, LanguageCode } from "./types";
 
@@ -53,18 +54,23 @@ export function createAdminContent(options: AdminContentOptions) {
     activeBlock = hasEditor() ? section.blocks[0][0] : "";
   };
 
-  const payload = () => {
+  const currentSortOrder = (): number => {
+    return hasEditor() ? options.getSection().blocks.findIndex(([key]) => key === activeBlock) : 0;
+  };
+
+  const payload = (language: LanguageCode = options.getLanguage(), overrides: Partial<ContentSection> = {}) => {
     const section = options.getSection();
     return {
       page_key: section.key,
-      language: options.getLanguage(),
+      language,
       section_key: activeBlock,
       title: fields.title.value.trim(),
       summary: fields.summary.value.trim(),
       body: fields.body.value.trim(),
       status: fields.status.value,
-      sort_order: hasEditor() ? section.blocks.findIndex(([key]) => key === activeBlock) : 0,
-      updated_at: new Date().toISOString()
+      sort_order: currentSortOrder(),
+      updated_at: new Date().toISOString(),
+      ...overrides
     };
   };
 
@@ -179,6 +185,67 @@ export function createAdminContent(options: AdminContentOptions) {
     options.setText("editor-status", `Раздел «${section.title}» загружен.`);
   };
 
+  const saveTranslatedBlock = async (language: LanguageCode, translated: Record<string, string>): Promise<void> => {
+    const client = options.getClient();
+    const section = options.getSection();
+    const nextPayload = payload(language, {
+      title: translated.title || "",
+      summary: translated.summary || "",
+      body: translated.body || "",
+    });
+
+    const { data: existing, error: findError } = await client
+      .from("content_sections")
+      .select("id")
+      .eq("page_key", section.key)
+      .eq("section_key", activeBlock)
+      .eq("language", language)
+      .maybeSingle();
+
+    if (findError) throw new Error(findError.message);
+
+    const { error } = existing?.id
+      ? await client.from("content_sections").update(nextPayload).eq("id", existing.id)
+      : await client.from("content_sections").insert(nextPayload);
+
+    if (error) throw new Error(error.message);
+  };
+
+  const translateCurrentBlock = async (event: Event): Promise<void> => {
+    const feedback = buttonFeedback(event, requiredElement<HTMLButtonElement>(options.$, "translate-content-button"));
+    feedback.start("Перевод...");
+    richEditors.forEach((editor) => editor.syncToTextarea());
+    const client = options.getClient();
+    if (!client || !hasEditor()) {
+      feedback.fail("Недоступно");
+      return;
+    }
+    if (options.getLanguage() !== "ru") {
+      options.setText("editor-status", "Автоперевод запускается из русской вкладки RU.");
+      feedback.fail("Откройте RU");
+      return;
+    }
+
+    try {
+      const translations = await translateBlock(client, "ru", `${options.getSection().title}: ${activeBlock}`, {
+        title: fields.title.value.trim(),
+        summary: fields.summary.value.trim(),
+        body: fields.body.value.trim(),
+      });
+
+      for (const language of ["fr", "en"] as LanguageCode[]) {
+        if (translations[language]) await saveTranslatedBlock(language, translations[language] || {});
+      }
+
+      await loadRecords();
+      options.setText("editor-status", "Блок переведен на FR/EN. Откройте языковые вкладки, чтобы проверить и поправить текст.");
+      feedback.success("Переведено");
+    } catch (error) {
+      options.setText("editor-status", `Ошибка перевода: ${error instanceof Error ? error.message : "неизвестная ошибка"}`);
+      feedback.fail("Ошибка");
+    }
+  };
+
   const save = async (event: Event): Promise<void> => {
     event.preventDefault();
     const feedback = buttonFeedback(event, requiredElement<HTMLButtonElement>(options.$, "save-content-button"));
@@ -226,6 +293,7 @@ export function createAdminContent(options: AdminContentOptions) {
 
   const bindEvents = (): void => {
     requiredElement<HTMLFormElement>(options.$, "content-form").addEventListener("submit", save);
+    requiredElement<HTMLButtonElement>(options.$, "translate-content-button").addEventListener("click", translateCurrentBlock);
     requiredElement<HTMLButtonElement>(options.$, "clear-content-button").addEventListener("click", clearForm);
     requiredElement<HTMLButtonElement>(options.$, "delete-content-button").addEventListener("click", remove);
   };
