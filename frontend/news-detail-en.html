@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Parish news item</title>
+    <meta name="description" content="Full parish news item for St Michael the Archangel Church in Cannes.">
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="/src/cms.ts"></script>
+    <script type="module" src="/src/app.ts"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="en.html" aria-label="Home">
+        <span class="brand-mark"><img src="assets/logo.jpg" alt="St Michael the Archangel"></span>
+        <span><strong>St Michael the Archangel</strong><small>Orthodox parish in Cannes</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Navigation"><a href="schedule-en.html">Services</a><a href="sacraments-en.html">Sacraments</a><a href="history-en.html">History</a><a href="gallery-en.html">Gallery</a><a href="visit-en.html">Visit</a><a href="help-en.html">Support</a><a href="contacts-en.html">Contacts</a></nav>
+      <div class="lang-switch church-lang-switch" aria-label="Languages"><a href="news.html">🇷🇺</a><a href="news-fr.html">🇫🇷</a><a class="active" href="news-en.html">🇬🇧</a></div>
+    </header>
+    <main>
+      <button class="page-back" type="button" onclick="history.length > 1 ? history.back() : location.href='news-en.html'">Back</button>
+      <section class="page-hero"><p class="section-label">News</p><h1 data-news-detail-title>Parish news item</h1></section>
+      <article class="section history-article" data-news-detail>
+        <time data-news-detail-date></time>
+        <div data-news-detail-body></div>
+        <div class="photo-gallery" data-news-detail-photos></div>
+      </article>
+    </main>
+    <footer class="site-footer"><p>© St Michael the Archangel Church in Cannes</p><p><a href="news-en.html">All news</a></p></footer>
+  </body>
+</html>
