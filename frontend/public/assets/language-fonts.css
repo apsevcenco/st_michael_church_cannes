@@ -35,15 +35,20 @@ html[lang="en"] .schedule-poster::after {
 }
 
 html[lang="fr"] .brand strong,
+html[lang="en"] .brand strong {
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.1;
+}
+
 html[lang="fr"] .brand small,
-html[lang="en"] .brand strong,
 html[lang="en"] .brand small {
+  font-size: clamp(12px, 1.2vw, 15px);
   line-height: 1.1;
 }
 
 html[lang="fr"] .main-nav,
 html[lang="en"] .main-nav {
-  font-size: clamp(18px, 1.55vw, 24px);
+  font-size: clamp(14px, 1.3vw, 18px);
 }
 
 html[lang="fr"] h1,
@@ -55,10 +60,12 @@ html[lang="en"] h2 {
 
 html[lang="fr"] .hero h1,
 html[lang="en"] .hero h1 {
-  font-size: clamp(38px, 6.2vw, 76px);
+  font-size: clamp(26px, 4.2vw, 50px);
+  line-height: 1.08;
 }
 
 html[lang="fr"] .page-hero h1,
 html[lang="en"] .page-hero h1 {
-  font-size: clamp(38px, 6.6vw, 78px);
+  font-size: clamp(26px, 4.4vw, 52px);
+  line-height: 1.08;
 }
