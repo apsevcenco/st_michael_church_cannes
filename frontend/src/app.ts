@@ -21,17 +21,6 @@ function pageHomeFor(file: string): string {
   return "index.html";
 }
 
-function loadLanguageHeadingFont(): void {
-  const language = document.documentElement.lang;
-  if (language !== "fr" && language !== "en") return;
-  if (document.querySelector('link[href="assets/language-fonts.css"]')) return;
-
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = "assets/language-fonts.css";
-  document.head.appendChild(link);
-}
-
 function normalizeLanguageLinks(): void {
   document.querySelectorAll<HTMLAnchorElement>(".church-lang-switch a, .nav-lang-row a").forEach((link) => {
     const targetPage = pageFromHref(link.getAttribute("href"));
@@ -126,7 +115,6 @@ function setupMobileMenu(): void {
   });
 }
 
-loadLanguageHeadingFont();
 normalizeLanguageLinks();
 addBackButton();
 setupHeroSlideshow();
