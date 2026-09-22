@@ -24,21 +24,32 @@ const siteInfo = {
   updatedAt: new Date().toISOString()
 };
 
-function corsHeaders() {
+function allowedOrigin(request) {
+  const origin = request.headers.origin || "";
+  const allowed = new Set([
+    FRONTEND_ORIGIN,
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+  ]);
+  if (FRONTEND_ORIGIN === "*" || allowed.has(origin)) return origin || FRONTEND_ORIGIN;
+  return FRONTEND_ORIGIN;
+}
+
+function corsHeaders(request) {
   return {
-    "Access-Control-Allow-Origin": FRONTEND_ORIGIN,
+    "Access-Control-Allow-Origin": allowedOrigin(request),
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Vary": "Origin"
   };
 }
 
-function sendJson(response, statusCode, payload) {
+function sendJson(request, response, statusCode, payload) {
   const body = JSON.stringify(payload, null, 2);
 
   response.writeHead(statusCode, {
     ...SECURITY_HEADERS,
-    ...corsHeaders(),
+    ...corsHeaders(request),
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store"
   });
@@ -179,30 +190,30 @@ async function translateWithOpenAI(payload) {
 async function translateBlock(request, response) {
   const admin = await verifyAdmin(request);
   if (!admin.ok) {
-    sendJson(response, admin.status, { ok: false, error: admin.error });
+    sendJson(request, response, admin.status, { ok: false, error: admin.error });
     return;
   }
   if (!OPENAI_API_KEY) {
-    sendJson(response, 503, { ok: false, error: "OpenAI API key is not configured" });
+    sendJson(request, response, 503, { ok: false, error: "OpenAI API key is not configured" });
     return;
   }
 
   const body = await readJson(request);
   const payload = normalizeTranslationPayload(body);
   if (!payload.targets.length) {
-    sendJson(response, 400, { ok: false, error: "No target languages requested" });
+    sendJson(request, response, 400, { ok: false, error: "No target languages requested" });
     return;
   }
   if (!Object.values(payload.fields).some((value) => String(value).trim())) {
-    sendJson(response, 400, { ok: false, error: "Nothing to translate" });
+    sendJson(request, response, 400, { ok: false, error: "Nothing to translate" });
     return;
   }
 
   try {
     const translations = await translateWithOpenAI(payload);
-    sendJson(response, 200, { ok: true, translations });
+    sendJson(request, response, 200, { ok: true, translations });
   } catch (error) {
-    sendJson(response, 502, { ok: false, error: error.message || "OpenAI translation failed" });
+    sendJson(request, response, 502, { ok: false, error: error.message || "OpenAI translation failed" });
   }
 }
 
@@ -216,7 +227,8 @@ function translationStatusPayload() {
       supabaseUrlConfigured: Boolean(SUPABASE_URL),
       supabaseAnonKeyConfigured: Boolean(SUPABASE_ANON_KEY),
       supabaseServiceRoleKeyConfigured: Boolean(SUPABASE_SERVICE_ROLE_KEY),
-      frontendOrigin: FRONTEND_ORIGIN
+      frontendOrigin: FRONTEND_ORIGIN,
+      localOriginsAllowed: true
     }
   };
 }
@@ -226,7 +238,7 @@ const server = http.createServer(async (request, response) => {
     if (request.method === "OPTIONS") {
       response.writeHead(204, {
         ...SECURITY_HEADERS,
-        ...corsHeaders()
+        ...corsHeaders(request)
       });
       response.end();
       return;
@@ -240,36 +252,36 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.method !== "GET") {
-      sendJson(response, 405, { ok: false, error: "Method not allowed" });
+      sendJson(request, response, 405, { ok: false, error: "Method not allowed" });
       return;
     }
 
     if (url.pathname === "/" || url.pathname === "/healthz") {
-      sendJson(response, 200, { ok: true, service: "st-michael-cannes-backend" });
+      sendJson(request, response, 200, { ok: true, service: "st-michael-cannes-backend" });
       return;
     }
 
     if (url.pathname === "/api/translate/status") {
-      sendJson(response, 200, translationStatusPayload());
+      sendJson(request, response, 200, translationStatusPayload());
       return;
     }
 
     if (url.pathname === "/api/site") {
-      sendJson(response, 200, siteInfo);
+      sendJson(request, response, 200, siteInfo);
       return;
     }
 
     if (url.pathname === "/api/services") {
-      sendJson(response, 200, {
+      sendJson(request, response, 200, {
         services: [],
         message: "The current service schedule is managed on the website through the CMS."
       });
       return;
     }
 
-    sendJson(response, 404, { ok: false, error: "Not found" });
+    sendJson(request, response, 404, { ok: false, error: "Not found" });
   } catch (error) {
-    sendJson(response, 500, { ok: false, error: error.message || "Internal server error" });
+    sendJson(request, response, 500, { ok: false, error: error.message || "Internal server error" });
   }
 });
 
