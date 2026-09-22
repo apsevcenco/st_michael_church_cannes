@@ -1,6 +1,28 @@
 import { escapeHtml, richTextToHtml } from "./shared";
 import type { ContentSection } from "./types";
 
+const LATIN_LOANWORDS = /\b(cookies?)\b/gi;
+
+function wrapLatinLoanwords(element: HTMLElement): void {
+  const text = element.textContent || "";
+  LATIN_LOANWORDS.lastIndex = 0;
+  if (!LATIN_LOANWORDS.test(text)) return;
+  LATIN_LOANWORDS.lastIndex = 0;
+
+  element.textContent = "";
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = LATIN_LOANWORDS.exec(text))) {
+    if (match.index > lastIndex) element.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+    const span = document.createElement("span");
+    span.className = "latin-word";
+    span.textContent = match[0];
+    element.appendChild(span);
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < text.length) element.appendChild(document.createTextNode(text.slice(lastIndex)));
+}
+
 export function applyHero(record?: ContentSection): void {
   const hero = document.querySelector(".page-hero");
   if (!hero || !record) return;
@@ -8,7 +30,10 @@ export function applyHero(record?: ContentSection): void {
   const h1 = hero.querySelector("h1");
   const text = hero.querySelector("p:not(.section-label)");
 
-  if (h1 && Object.prototype.hasOwnProperty.call(record, "title")) h1.textContent = record.title || "";
+  if (h1 && Object.prototype.hasOwnProperty.call(record, "title")) {
+    h1.textContent = record.title || "";
+    wrapLatinLoanwords(h1);
+  }
   if (text && Object.prototype.hasOwnProperty.call(record, "summary")) text.innerHTML = richTextToHtml(record.summary);
 }
 

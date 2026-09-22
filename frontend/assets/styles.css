@@ -313,6 +313,10 @@ h1 {
   line-height: 0.98;
 }
 
+.latin-word {
+  font-family: "Uncial Antiqua Parish", "Uncial Antiqua", Georgia, "Times New Roman", serif;
+}
+
 h2 {
   margin-bottom: 16px;
   font-size: clamp(30px, 4vw, 52px);
