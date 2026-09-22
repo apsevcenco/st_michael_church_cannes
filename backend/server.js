@@ -1,7 +1,7 @@
 const http = require("node:http");
 
 const PORT = Number(process.env.PORT || 10000);
-const RELEASE_ID = "translate-diagnostics-2026-09-22";
+const RELEASE_ID = "translate-diagnostics-2026-09-22-cors";
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
@@ -32,12 +32,30 @@ const STATUS_PATHS = new Set([
   "/status"
 ]);
 
+function extractUrl(value) {
+  const text = String(value || "").trim();
+  const markdownUrl = text.match(/\((https?:\/\/[^)]+)\)/i);
+  if (markdownUrl) return markdownUrl[1];
+  const plainUrl = text.match(/https?:\/\/[^\s)\]]+/i);
+  return plainUrl ? plainUrl[0] : text;
+}
+
 function normalizeOrigin(value) {
-  if (!value || value === "*") return value || "";
+  const extracted = extractUrl(value);
+  if (!extracted || extracted === "*") return extracted || "";
   try {
-    return new URL(value).origin;
+    return new URL(extracted).origin;
   } catch {
-    return String(value).replace(/\/$/, "");
+    return String(extracted).replace(/\/$/, "");
+  }
+}
+
+function isParishRenderOrigin(origin) {
+  try {
+    const url = new URL(origin);
+    return url.protocol === "https:" && /^st-michael-church-cannes([-.][a-z0-9-]+)?\.onrender\.com$/i.test(url.hostname);
+  } catch {
+    return false;
   }
 }
 
@@ -47,12 +65,13 @@ function allowedOrigin(request) {
   const allowed = new Set([
     configuredOrigin,
     "https://st-michael-church-cannes-frontend.onrender.com",
+    "https://st-michael-church-cannes.onrender.com",
     "http://localhost:5173",
     "http://127.0.0.1:5173"
   ]);
 
   if (configuredOrigin === "*") return origin || "*";
-  if (allowed.has(origin)) return origin;
+  if (origin && (allowed.has(origin) || isParishRenderOrigin(origin))) return origin;
   return configuredOrigin || "https://st-michael-church-cannes-frontend.onrender.com";
 }
 
@@ -61,6 +80,7 @@ function corsHeaders(request) {
     "Access-Control-Allow-Origin": allowedOrigin(request),
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
   };
 }
@@ -238,11 +258,13 @@ async function translateBlock(request, response) {
   }
 }
 
-function translationStatusPayload() {
+function translationStatusPayload(request) {
   return {
     ok: true,
     service: "st-michael-cannes-backend",
     releaseId: RELEASE_ID,
+    requestOrigin: normalizeOrigin(request.headers.origin || ""),
+    resolvedCorsOrigin: allowedOrigin(request),
     routes: ["/healthz", "/api/translate", "/api/translate/status", "/status"],
     translation: {
       openaiApiKeyConfigured: Boolean(OPENAI_API_KEY),
@@ -290,7 +312,7 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (STATUS_PATHS.has(pathname)) {
-      sendJson(request, response, 200, translationStatusPayload());
+      sendJson(request, response, 200, translationStatusPayload(request));
       return;
     }
 
