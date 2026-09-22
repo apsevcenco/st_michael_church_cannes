@@ -38,6 +38,7 @@ export interface MediaFile {
 
 export interface ParishNews {
   id: string;
+  translation_group_id?: string | null;
   language: LanguageCode;
   event_date: string;
   title: string;
