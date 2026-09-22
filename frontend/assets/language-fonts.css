@@ -1,8 +1,8 @@
-@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap");
 
 @font-face {
-  font-family: "EB Garamond Parish";
-  src: local("EB Garamond"), url("fonts/eb-garamond.08-regular.ttf") format("truetype");
+  font-family: "Uncial Antiqua Parish";
+  src: local("Uncial Antiqua"), url("fonts/uncial-antiqua.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -10,7 +10,7 @@
 
 html[lang="fr"],
 html[lang="en"] {
-  --church-heading-font: "EB Garamond Parish", "EB Garamond", Georgia, "Times New Roman", serif;
+  --church-heading-font: "Uncial Antiqua Parish", "Uncial Antiqua", Georgia, "Times New Roman", serif;
 }
 
 html[lang="fr"] .link-grid a,
@@ -35,13 +35,30 @@ html[lang="en"] .schedule-poster::after {
 }
 
 html[lang="fr"] .brand strong,
-html[lang="en"] .brand strong {
-  line-height: 1.05;
+html[lang="fr"] .brand small,
+html[lang="en"] .brand strong,
+html[lang="en"] .brand small {
+  line-height: 1.1;
+}
+
+html[lang="fr"] .main-nav,
+html[lang="en"] .main-nav {
+  font-size: clamp(18px, 1.55vw, 24px);
 }
 
 html[lang="fr"] h1,
 html[lang="fr"] h2,
 html[lang="en"] h1,
 html[lang="en"] h2 {
-  line-height: 1.08;
+  line-height: 1.12;
+}
+
+html[lang="fr"] .hero h1,
+html[lang="en"] .hero h1 {
+  font-size: clamp(38px, 6.2vw, 76px);
+}
+
+html[lang="fr"] .page-hero h1,
+html[lang="en"] .page-hero h1 {
+  font-size: clamp(38px, 6.6vw, 78px);
 }
