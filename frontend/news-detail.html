@@ -6,6 +6,7 @@
     <title>Новость храма</title>
     <meta name="description" content="Полная новость прихода Архангела Михаила в Каннах.">
     <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="assets/news-detail.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="/src/cms.ts"></script>
     <script type="module" src="/src/app.ts"></script>
@@ -21,7 +22,7 @@
     </header>
     <main>
       <button class="page-back" type="button" onclick="history.length > 1 ? history.back() : location.href='news.html'">Назад</button>
-      <section class="page-hero"><p class="section-label">Новости</p><h1 data-news-detail-title>Новость храма</h1></section>
+      <section class="page-hero news-detail-hero"><p class="section-label">Новости</p><h1 data-news-detail-title>Новость храма</h1></section>
       <article class="section history-article" data-news-detail>
         <time data-news-detail-date></time>
         <div data-news-detail-body></div>
