@@ -52,7 +52,7 @@ function renderNewsCard(item: ParishNews, photos: ParishNewsPhoto[], language: L
         ${firstPhoto ? `<img class="news-card-image" src="${escapeHtml(firstPhoto.safe_url)}" alt="${escapeHtml(firstPhoto.description || item.title)}" loading="lazy">` : ""}
         <time>${escapeHtml(formatPublicDate(item.event_date, language))}</time>
         <h3>${escapeHtml(item.title)}</h3>
-        ${item.excerpt ? richTextToHtml(item.excerpt) : ""}
+        <div class="news-card-excerpt">${item.excerpt ? richTextToHtml(item.excerpt) : ""}</div>
         <a class="text-link news-read-more" href="${escapeHtml(newsDetailUrl(item.id, language))}">${escapeHtml(readMoreLabels[language])}</a>
         ${safePhotos.length > 1 ? `<div class="news-photo-strip">${safePhotos.map((photo) => `<img src="${escapeHtml(photo.safe_url)}" alt="${escapeHtml(photo.description || item.title)}" loading="lazy">`).join("")}</div>` : ""}
       </article>

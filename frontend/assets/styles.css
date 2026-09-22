@@ -637,6 +637,11 @@ h6 {
   box-shadow: var(--soft-shadow);
 }
 
+.news-grid article {
+  display: flex;
+  flex-direction: column;
+}
+
 .service-card::before,
 .news-grid article::before,
 .visitor-rules article::before,
@@ -1682,6 +1687,8 @@ main .section li,
 
 .news-page-list .news-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
   padding: 22px;
   overflow: hidden;
   background:
@@ -1710,6 +1717,25 @@ main .section li,
   max-width: none;
   object-fit: cover;
   border-bottom: 1px solid var(--line);
+}
+
+.news-card-excerpt {
+  min-height: 4.5em;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.news-card-excerpt p {
+  margin: 0 0 0.4em;
+}
+
+.news-read-more {
+  display: inline-block;
+  margin-top: auto;
+  padding-top: 10px;
 }
 
 .news-card details {
