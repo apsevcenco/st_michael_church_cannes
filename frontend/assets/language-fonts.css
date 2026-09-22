@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: "Uncial Antiqua Parish";
-  src: local("Uncial Antiqua"), url("fonts/uncial-antiqua.ttf") format("truetype");
+  src: local("Uncial Antiqua"), url("fonts/UncialAntiqua-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
