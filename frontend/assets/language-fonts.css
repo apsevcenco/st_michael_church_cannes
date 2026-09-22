@@ -1,0 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&display=swap");
+
+@font-face {
+  font-family: "EB Garamond Parish";
+  src: local("EB Garamond"), url("fonts/eb-garamond.08-regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+html[lang="fr"],
+html[lang="en"] {
+  --church-heading-font: "EB Garamond Parish", "EB Garamond", Georgia, "Times New Roman", serif;
+}
+
+html[lang="fr"] .link-grid a,
+html[lang="fr"] .link-grid-locked,
+html[lang="fr"] .sacrament-subnav a,
+html[lang="fr"] .sacrament-subnav .disabled,
+html[lang="fr"] .poster-mark,
+html[lang="fr"] .page-hero::before,
+html[lang="fr"] .page-hero::after,
+html[lang="fr"] .schedule-poster::before,
+html[lang="fr"] .schedule-poster::after,
+html[lang="en"] .link-grid a,
+html[lang="en"] .link-grid-locked,
+html[lang="en"] .sacrament-subnav a,
+html[lang="en"] .sacrament-subnav .disabled,
+html[lang="en"] .poster-mark,
+html[lang="en"] .page-hero::before,
+html[lang="en"] .page-hero::after,
+html[lang="en"] .schedule-poster::before,
+html[lang="en"] .schedule-poster::after {
+  font-family: var(--church-heading-font);
+}
+
+html[lang="fr"] .brand strong,
+html[lang="en"] .brand strong {
+  line-height: 1.05;
+}
+
+html[lang="fr"] h1,
+html[lang="fr"] h2,
+html[lang="en"] h1,
+html[lang="en"] h2 {
+  line-height: 1.08;
+}
