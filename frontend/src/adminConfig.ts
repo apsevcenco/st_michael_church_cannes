@@ -167,6 +167,36 @@ export const adminSections: AdminSectionConfig[] = [
     media: []
   },
   {
+    key: "cookies",
+    title: "Cookies",
+    description: "Текст страницы о файлах cookie и localStorage. Переводится на FR/EN кнопкой автоперевода.",
+    blocks: [
+      ["hero", "Заголовок страницы"],
+      ["body", "Текст политики"]
+    ],
+    media: []
+  },
+  {
+    key: "legal-notice",
+    title: "Legal Notice",
+    description: "Юридическая информация об издателе сайта (mentions légales). Переводится на FR/EN кнопкой автоперевода.",
+    blocks: [
+      ["hero", "Заголовок страницы"],
+      ["body", "Текст"]
+    ],
+    media: []
+  },
+  {
+    key: "privacy-policy",
+    title: "Политика конфиденциальности",
+    description: "Политика обработки персональных данных (politique de confidentialité). Переводится на FR/EN кнопкой автоперевода.",
+    blocks: [
+      ["hero", "Заголовок страницы"],
+      ["body", "Текст"]
+    ],
+    media: []
+  },
+  {
     key: "news",
     title: "Новости",
     description: "Календарные новости прихода с датой, текстом и фотографиями. Последние три показываются на главной.",
