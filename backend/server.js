@@ -1,7 +1,7 @@
 const http = require("node:http");
 
 const PORT = Number(process.env.PORT || 10000);
-const RELEASE_ID = "translate-diagnostics-2026-09-22-cors";
+const RELEASE_ID = "translate-cors-custom-domain-2026-09-22";
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
@@ -59,6 +59,15 @@ function isParishRenderOrigin(origin) {
   }
 }
 
+function isParishCustomDomain(origin) {
+  try {
+    const url = new URL(origin);
+    return url.protocol === "https:" && /^(www\.)?saint-michel-cannes\.fr$/i.test(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 function allowedOrigin(request) {
   const origin = normalizeOrigin(request.headers.origin || "");
   const configuredOrigin = normalizeOrigin(FRONTEND_ORIGIN);
@@ -66,12 +75,14 @@ function allowedOrigin(request) {
     configuredOrigin,
     "https://st-michael-church-cannes-frontend.onrender.com",
     "https://st-michael-church-cannes.onrender.com",
+    "https://saint-michel-cannes.fr",
+    "https://www.saint-michel-cannes.fr",
     "http://localhost:5173",
     "http://127.0.0.1:5173"
   ]);
 
   if (configuredOrigin === "*") return origin || "*";
-  if (origin && (allowed.has(origin) || isParishRenderOrigin(origin))) return origin;
+  if (origin && (allowed.has(origin) || isParishRenderOrigin(origin) || isParishCustomDomain(origin))) return origin;
   return configuredOrigin || "https://st-michael-church-cannes-frontend.onrender.com";
 }
 

@@ -42,7 +42,7 @@ services:
     autoDeployTrigger: commit
     envVars:
       - key: FRONTEND_ORIGIN
-        value: "https://st-michael-church-cannes-frontend.onrender.com"
+        value: "https://saint-michel-cannes.fr"
       - key: SUPABASE_URL
         value: "https://mkaxtebegspaetwoxfgq.supabase.co"
       - key: SUPABASE_ANON_KEY
