@@ -93,7 +93,10 @@ async function verifyAdmin(request) {
     }
   });
 
-  if (!adminResponse.ok) return { ok: false, status: 403, error: "Cannot verify admin access" };
+  if (!adminResponse.ok) {
+    const details = await adminResponse.text().catch(() => "");
+    return { ok: false, status: 403, error: `Cannot verify admin access${details ? `: ${details.slice(0, 180)}` : ""}` };
+  }
   const rows = await adminResponse.json();
   if (!Array.isArray(rows) || rows.length === 0) return { ok: false, status: 403, error: "Admin access required" };
 
@@ -122,28 +125,17 @@ function normalizeTranslationPayload(body) {
   };
 }
 
-async function translateBlock(request, response) {
-  const admin = await verifyAdmin(request);
-  if (!admin.ok) {
-    sendJson(response, admin.status, { ok: false, error: admin.error });
-    return;
+function safeJsonParse(value) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    const match = String(value || "").match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+    throw new Error("OpenAI returned invalid translation JSON");
   }
-  if (!OPENAI_API_KEY) {
-    sendJson(response, 503, { ok: false, error: "OpenAI API key is not configured" });
-    return;
-  }
+}
 
-  const body = await readJson(request);
-  const payload = normalizeTranslationPayload(body);
-  if (!payload.targets.length) {
-    sendJson(response, 400, { ok: false, error: "No target languages requested" });
-    return;
-  }
-  if (!Object.values(payload.fields).some((value) => String(value).trim())) {
-    sendJson(response, 400, { ok: false, error: "Nothing to translate" });
-    return;
-  }
-
+async function translateWithOpenAI(payload) {
   const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -173,19 +165,60 @@ async function translateBlock(request, response) {
     })
   });
 
-  const openaiPayload = await openaiResponse.json().catch(() => ({}));
+  const text = await openaiResponse.text();
+  const openaiPayload = text ? safeJsonParse(text) : {};
   if (!openaiResponse.ok) {
-    sendJson(response, 502, { ok: false, error: openaiPayload.error?.message || "OpenAI translation failed" });
+    throw new Error(openaiPayload.error?.message || `OpenAI translation failed with status ${openaiResponse.status}`);
+  }
+
+  const content = openaiPayload.choices?.[0]?.message?.content || "{}";
+  const parsed = safeJsonParse(content);
+  return parsed.translations || {};
+}
+
+async function translateBlock(request, response) {
+  const admin = await verifyAdmin(request);
+  if (!admin.ok) {
+    sendJson(response, admin.status, { ok: false, error: admin.error });
+    return;
+  }
+  if (!OPENAI_API_KEY) {
+    sendJson(response, 503, { ok: false, error: "OpenAI API key is not configured" });
+    return;
+  }
+
+  const body = await readJson(request);
+  const payload = normalizeTranslationPayload(body);
+  if (!payload.targets.length) {
+    sendJson(response, 400, { ok: false, error: "No target languages requested" });
+    return;
+  }
+  if (!Object.values(payload.fields).some((value) => String(value).trim())) {
+    sendJson(response, 400, { ok: false, error: "Nothing to translate" });
     return;
   }
 
   try {
-    const content = openaiPayload.choices?.[0]?.message?.content || "{}";
-    const parsed = JSON.parse(content);
-    sendJson(response, 200, { ok: true, translations: parsed.translations || {} });
-  } catch {
-    sendJson(response, 502, { ok: false, error: "OpenAI returned invalid translation JSON" });
+    const translations = await translateWithOpenAI(payload);
+    sendJson(response, 200, { ok: true, translations });
+  } catch (error) {
+    sendJson(response, 502, { ok: false, error: error.message || "OpenAI translation failed" });
   }
+}
+
+function translationStatusPayload() {
+  return {
+    ok: true,
+    service: "st-michael-cannes-backend",
+    translation: {
+      openaiApiKeyConfigured: Boolean(OPENAI_API_KEY),
+      openaiModel: OPENAI_MODEL,
+      supabaseUrlConfigured: Boolean(SUPABASE_URL),
+      supabaseAnonKeyConfigured: Boolean(SUPABASE_ANON_KEY),
+      supabaseServiceRoleKeyConfigured: Boolean(SUPABASE_SERVICE_ROLE_KEY),
+      frontendOrigin: FRONTEND_ORIGIN
+    }
+  };
 }
 
 const server = http.createServer(async (request, response) => {
@@ -213,6 +246,11 @@ const server = http.createServer(async (request, response) => {
 
     if (url.pathname === "/" || url.pathname === "/healthz") {
       sendJson(response, 200, { ok: true, service: "st-michael-cannes-backend" });
+      return;
+    }
+
+    if (url.pathname === "/api/translate/status") {
+      sendJson(response, 200, translationStatusPayload());
       return;
     }
 
