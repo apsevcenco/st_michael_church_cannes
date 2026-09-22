@@ -24,15 +24,28 @@ const siteInfo = {
   updatedAt: new Date().toISOString()
 };
 
+function normalizeOrigin(value) {
+  if (!value || value === "*") return value || "";
+  try {
+    return new URL(value).origin;
+  } catch {
+    return String(value).replace(/\/$/, "");
+  }
+}
+
 function allowedOrigin(request) {
-  const origin = request.headers.origin || "";
+  const origin = normalizeOrigin(request.headers.origin || "");
+  const configuredOrigin = normalizeOrigin(FRONTEND_ORIGIN);
   const allowed = new Set([
-    FRONTEND_ORIGIN,
+    configuredOrigin,
+    "https://st-michael-church-cannes-frontend.onrender.com",
     "http://localhost:5173",
     "http://127.0.0.1:5173"
   ]);
-  if (FRONTEND_ORIGIN === "*" || allowed.has(origin)) return origin || FRONTEND_ORIGIN;
-  return FRONTEND_ORIGIN;
+
+  if (configuredOrigin === "*") return origin || "*";
+  if (allowed.has(origin)) return origin;
+  return configuredOrigin || "https://st-michael-church-cannes-frontend.onrender.com";
 }
 
 function corsHeaders(request) {
@@ -227,7 +240,7 @@ function translationStatusPayload() {
       supabaseUrlConfigured: Boolean(SUPABASE_URL),
       supabaseAnonKeyConfigured: Boolean(SUPABASE_ANON_KEY),
       supabaseServiceRoleKeyConfigured: Boolean(SUPABASE_SERVICE_ROLE_KEY),
-      frontendOrigin: FRONTEND_ORIGIN,
+      frontendOrigin: normalizeOrigin(FRONTEND_ORIGIN),
       localOriginsAllowed: true
     }
   };
