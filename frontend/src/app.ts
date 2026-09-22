@@ -32,17 +32,26 @@ function normalizeLanguageLinks(): void {
   });
 }
 
+const BACK_BUTTON_LABELS: Record<string, { text: string; ariaLabel: string }> = {
+  ru: { text: "Назад", ariaLabel: "Вернуться назад" },
+  fr: { text: "Retour", ariaLabel: "Revenir en arrière" },
+  en: { text: "Back", ariaLabel: "Go back" }
+};
+
 function addBackButton(): void {
   if (["index.html", "fr.html", "en.html", "admin.html"].includes(currentPage)) return;
 
   const main = document.querySelector("main");
   if (!main || document.querySelector(".page-back")) return;
 
+  const language = document.documentElement.lang;
+  const labels = BACK_BUTTON_LABELS[language] || BACK_BUTTON_LABELS.ru;
+
   const button = document.createElement("button");
   button.type = "button";
   button.className = "page-back";
-  button.textContent = "Назад";
-  button.setAttribute("aria-label", "Вернуться назад");
+  button.textContent = labels.text;
+  button.setAttribute("aria-label", labels.ariaLabel);
   button.addEventListener("click", () => {
     if (window.history.length > 1) {
       window.history.back();
@@ -73,7 +82,7 @@ function setupMobileMenu(): void {
 
   const button = document.createElement("button");
   button.className = "hamburger-btn";
-  button.setAttribute("aria-label", "Меню");
+  button.setAttribute("aria-label", document.documentElement.lang === "ru" ? "Меню" : "Menu");
   button.setAttribute("aria-expanded", "false");
   button.innerHTML = "<span></span><span></span><span></span>";
   header.appendChild(button);

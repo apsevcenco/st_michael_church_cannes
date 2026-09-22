@@ -44,8 +44,8 @@ import type { ContentSection, MediaFile } from "./types";
     applyExtraBlocks(content);
 
     const mediaFiles = media;
-    await applySchedulePdf(mediaFiles);
-    applyDocuments(mediaFiles);
+    await applySchedulePdf(mediaFiles, language);
+    applyDocuments(mediaFiles, language);
     applyGallery(mediaFiles);
     await loadNews(client, language);
     setupLightbox();

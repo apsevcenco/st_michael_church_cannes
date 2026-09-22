@@ -1,8 +1,42 @@
 import { escapeHtml, safePublicUrl } from "./shared";
-import type { MediaFile } from "./types";
+import type { LanguageCode, MediaFile } from "./types";
 
 const PDFJS_SCRIPT_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";
 const PDFJS_WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+
+const MEDIA_LABELS: Record<LanguageCode, {
+  scheduleImageAlt: string;
+  loadingSchedule: string;
+  pdfFallback: string;
+  openPdf: string;
+  pdfError: string;
+  document: string;
+}> = {
+  ru: {
+    scheduleImageAlt: "Расписание богослужений",
+    loadingSchedule: "Загружаем расписание...",
+    pdfFallback: "Если расписание не отобразилось, откройте PDF в новой вкладке.",
+    openPdf: "Открыть PDF расписания богослужений",
+    pdfError: "Не удалось показать PDF на странице.",
+    document: "Документ"
+  },
+  fr: {
+    scheduleImageAlt: "Horaires des offices",
+    loadingSchedule: "Chargement des horaires...",
+    pdfFallback: "Si les horaires ne s'affichent pas, ouvrez le PDF dans un nouvel onglet.",
+    openPdf: "Ouvrir le PDF des horaires",
+    pdfError: "Impossible d'afficher le PDF sur la page.",
+    document: "Document"
+  },
+  en: {
+    scheduleImageAlt: "Service schedule",
+    loadingSchedule: "Loading the schedule...",
+    pdfFallback: "If the schedule doesn't display, open the PDF in a new tab.",
+    openPdf: "Open the service schedule PDF",
+    pdfError: "Unable to display the PDF on this page.",
+    document: "Document"
+  }
+};
 
 function loadPdfJs(): Promise<any> {
   if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
@@ -63,18 +97,19 @@ function isImageMedia(item: MediaFile): boolean {
   return mimeType.startsWith("image/") || /\.(jpe?g|png|webp|gif)(\?|#|$)/.test(fileName);
 }
 
-function renderScheduleImage(imageUrl: string, pagesContainer: HTMLElement, title?: string | null): void {
+function renderScheduleImage(imageUrl: string, pagesContainer: HTMLElement, labels: (typeof MEDIA_LABELS)[LanguageCode], title?: string | null): void {
   pagesContainer.innerHTML = "";
 
   const image = document.createElement("img");
   image.className = "schedule-image-page";
   image.src = imageUrl;
-  image.alt = title || "Расписание богослужений";
+  image.alt = title || labels.scheduleImageAlt;
   image.loading = "lazy";
   pagesContainer.appendChild(image);
 }
 
-export async function applySchedulePdf(media: MediaFile[]): Promise<void> {
+export async function applySchedulePdf(media: MediaFile[], language: LanguageCode = "ru"): Promise<void> {
+  const labels = MEDIA_LABELS[language] || MEDIA_LABELS.ru;
   const pdf = media.find((item) => item.purpose === "schedule_pdf" && item.file_url);
   const pdfUrl = safePublicUrl(pdf?.file_url);
   if (!pdf || !pdfUrl) return;
@@ -90,12 +125,12 @@ export async function applySchedulePdf(media: MediaFile[]): Promise<void> {
 
   const pages = document.createElement("div");
   pages.className = "pdf-pages";
-  pages.textContent = "Загружаем расписание...";
+  pages.textContent = labels.loadingSchedule;
   viewer.appendChild(pages);
 
   const fallback = document.createElement("p");
   fallback.className = "pdf-viewer-fallback";
-  fallback.textContent = "Если расписание не отобразилось, откройте PDF в новой вкладке.";
+  fallback.textContent = labels.pdfFallback;
   viewer.appendChild(fallback);
 
   const link = document.createElement("a");
@@ -103,23 +138,24 @@ export async function applySchedulePdf(media: MediaFile[]): Promise<void> {
   link.href = pdfUrl;
   link.target = "_blank";
   link.rel = "noopener";
-  link.textContent = pdf.title || "Открыть PDF расписания богослужений";
+  link.textContent = pdf.title || labels.openPdf;
   viewer.appendChild(link);
 
   target.appendChild(viewer);
 
   try {
     if (isImageMedia(pdf)) {
-      renderScheduleImage(pdfUrl, pages, pdf.title);
+      renderScheduleImage(pdfUrl, pages, labels, pdf.title);
     } else {
       await renderPdfPages(pdfUrl, pages);
     }
   } catch {
-    pages.innerHTML = '<p class="empty-public-message">Не удалось показать PDF на странице.</p>';
+    pages.innerHTML = `<p class="empty-public-message">${escapeHtml(labels.pdfError)}</p>`;
   }
 }
 
-export function applyDocuments(media: MediaFile[]): void {
+export function applyDocuments(media: MediaFile[], language: LanguageCode = "ru"): void {
+  const labels = MEDIA_LABELS[language] || MEDIA_LABELS.ru;
   const documents = media
     .map((item) => ({ ...item, safe_url: safePublicUrl(item.file_url) }))
     .filter((item) => item.safe_url && !(item.mime_type || "").startsWith("image/") && item.purpose !== "schedule_pdf");
@@ -143,7 +179,7 @@ export function applyDocuments(media: MediaFile[]): void {
           .map(
             (item) => `
           <a class="info-card document-card" href="${escapeHtml(item.safe_url)}" target="_blank" rel="noopener">
-            <h2>${escapeHtml(item.title || item.file_name || "Документ")}</h2>
+            <h2>${escapeHtml(item.title || item.file_name || labels.document)}</h2>
             ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ""}
           </a>
         `
