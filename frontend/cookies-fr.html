@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Politique relative aux cookies</title>
+    <meta name="description" content="Quelles données techniques et quels cookies utilise le site de la paroisse Saint-Michel-Archange à Cannes.">
+    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="assets/language-fonts.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="/src/cms.ts"></script>
+    <script type="module" src="/src/app.ts"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="fr.html" aria-label="Accueil">
+        <span class="brand-mark"><img src="assets/logo.jpg" alt="Saint Michel Archange"></span>
+        <span><strong>Saint Michel Archange</strong><small>Paroisse orthodoxe à Cannes</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Navigation"><a href="schedule-fr.html">Offices</a><a href="sacraments-fr.html">Sacrements</a><a href="history-fr.html">Histoire</a><a href="gallery-fr.html">Galerie</a><a href="visit-fr.html">Visiter</a><a href="help-fr.html">Aider</a><a href="contacts-fr.html">Contacts</a></nav>
+      <div class="lang-switch church-lang-switch" aria-label="Languages"><a href="cookies.html">🇷🇺</a><a class="active" href="cookies-fr.html">🇫🇷</a><a href="cookies-en.html">🇬🇧</a></div>
+    </header>
+    <main>
+      <section class="page-hero"><p class="section-label">Informations légales</p><h1>Cookies et technologies similaires</h1></section>
+      <section class="section history-article">
+          <p><em>Dernière mise à jour : 22 septembre 2026.</em></p>
+
+          <h2>De quoi s'agit-il</h2>
+          <p>Un cookie est un petit fichier qu'un site peut enregistrer dans votre navigateur. Ce site n'utilise pas de cookies de suivi publicitaire classiques, mais utilise une technologie similaire — le <strong>localStorage</strong> de votre navigateur — et charge quelques services externes susceptibles de recevoir des données techniques sur votre appareil. Voici la liste complète et transparente de ce que le site utilise.</p>
+
+          <h2>Ce que le site utilise précisément</h2>
+          <p><strong>1. Statistiques de fréquentation (localStorage).</strong> Lors de votre visite sur une page publique, le site enregistre dans le localStorage de votre navigateur un identifiant de visite aléatoire et la date de votre première visite. Cela nous permet de savoir combien de personnes visitent le site, quelles pages sont les plus consultées et si les visiteurs reviennent. Avec cet identifiant, nous enregistrons également : la page consultée, la langue de l'interface, la page d'origine (referrer), le type d'appareil, le navigateur et le système d'exploitation (via le user-agent), le fuseau horaire et la résolution d'écran. Nous n'utilisons jamais ces données à des fins publicitaires, nous ne les vendons pas et ne les transmettons pas à des tiers, et nous ne constituons pas de profil marketing des visiteurs.</p>
+          <p><strong>2. Connexion de l'administrateur du site.</strong> La page <code>/admin.html</code> utilise le service Supabase pour la connexion par email et mot de passe, qui enregistre une session technique dans votre navigateur. Cela ne concerne que les administrateurs du site, pas les visiteurs habituels.</p>
+          <p><strong>3. Services externes intégrés aux pages.</strong> Certains éléments du site sont chargés directement depuis les serveurs de services tiers ; lors de leur chargement, votre navigateur contacte directement ces serveurs (avec votre adresse IP), indépendamment de notre site :</p>
+          <ul>
+            <li><strong>Google Fonts</strong> (fonts.googleapis.com, fonts.gstatic.com) — utilisé pour afficher la police décorative sur les versions française et anglaise du site ;</li>
+            <li><strong>jsDelivr</strong> (cdn.jsdelivr.net) — utilisé pour charger la bibliothèque Supabase nécessaire au fonctionnement du site ;</li>
+            <li><strong>OpenStreetMap</strong> (openstreetmap.org) — carte intégrée sur la page « Contacts ».</li>
+          </ul>
+          <p>Nous n'intégrons aucun réseau publicitaire, aucun bouton de réseau social traceur (Facebook Pixel, etc.) et n'utilisons aucun cookie de reciblage publicitaire.</p>
+
+          <h2>Durée de conservation</h2>
+          <p>L'identifiant de visite reste dans le localStorage de votre navigateur jusqu'à ce que vous effaciez vous-même les données du site dans les paramètres de votre navigateur. Les statistiques de fréquentation enregistrées dans notre base de données ne sont utilisées que sous forme agrégée, pour l'usage interne de la paroisse.</p>
+
+          <h2>Comment refuser</h2>
+          <p>Vous pouvez à tout moment :</p>
+          <ul>
+            <li>bloquer le localStorage et les cookies pour ce site dans les paramètres de votre navigateur ;</li>
+            <li>effacer les données déjà enregistrées via les paramètres de votre navigateur (« Effacer les données du site ») ;</li>
+            <li>utiliser le mode de navigation privée.</li>
+          </ul>
+          <p>Le blocage du localStorage n'affecte en rien l'accès aux textes, photos et autres informations du site — seules les statistiques internes de fréquentation cesseront de fonctionner correctement.</p>
+
+          <h2>Questions</h2>
+          <p>Pour toute question sur l'utilisation des données sur ce site, merci de nous contacter via la page <a href="contacts-fr.html">« Contacts »</a>.</p>
+      </section>
+    </main>
+    <footer class="site-footer"><p>© Paroisse Saint-Michel-Archange à Cannes</p><p><a href="fr.html">Accueil</a></p></footer>
+  </body>
+</html>

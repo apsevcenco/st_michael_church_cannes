@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cookie Policy</title>
+    <meta name="description" content="What technical data and cookies are used by the St Michael the Archangel parish website in Cannes.">
+    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="assets/language-fonts.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="/src/cms.ts"></script>
+    <script type="module" src="/src/app.ts"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="en.html" aria-label="Home">
+        <span class="brand-mark"><img src="assets/logo.jpg" alt="Saint Michael Archangel"></span>
+        <span><strong>Saint Michael Archangel</strong><small>Orthodox parish in Cannes</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Navigation"><a href="schedule-en.html">Services</a><a href="sacraments-en.html">Sacraments</a><a href="history-en.html">History</a><a href="gallery-en.html">Gallery</a><a href="visit-en.html">Visit</a><a href="help-en.html">Support</a><a href="contacts-en.html">Contacts</a></nav>
+      <div class="lang-switch church-lang-switch" aria-label="Languages"><a href="cookies.html">🇷🇺</a><a href="cookies-fr.html">🇫🇷</a><a class="active" href="cookies-en.html">🇬🇧</a></div>
+    </header>
+    <main>
+      <section class="page-hero"><p class="section-label">Legal information</p><h1>Cookies and similar technologies</h1></section>
+      <section class="section history-article">
+          <p><em>Last updated: 22 September 2026.</em></p>
+
+          <h2>What this is about</h2>
+          <p>A cookie is a small file a website can store in your browser. This site does not use classic advertising tracking cookies, but it does use a similar technology — your browser's <strong>localStorage</strong> — and loads a few external services that may receive technical data about your device. Below is a full and honest list of what the site actually uses.</p>
+
+          <h2>What the site uses, exactly</h2>
+          <p><strong>1. Visit statistics (localStorage).</strong> When you visit any public page, the site stores a random visit identifier and the date of your first visit in your browser's localStorage. This lets us understand how many people visit the site, which pages are popular, and whether visitors return. Alongside this identifier, we also record: the page you viewed, the interface language, the referring page, your device type, browser and operating system (from the user-agent), your time zone, and your screen resolution. We never use this data for advertising, we do not sell it or share it with third parties, and we do not build marketing profiles of visitors.</p>
+          <p><strong>2. Site administrator login.</strong> The <code>/admin.html</code> page uses the Supabase service for email/password login, which stores a technical login session in your browser. This only applies to site administrators, not regular visitors.</p>
+          <p><strong>3. External services embedded in the pages.</strong> Some elements of the site are loaded directly from third-party servers; when they load, your browser contacts those servers directly (with your IP address), independently of our site:</p>
+          <ul>
+            <li><strong>Google Fonts</strong> (fonts.googleapis.com, fonts.gstatic.com) — used to display the decorative heading font on the French and English versions of the site;</li>
+            <li><strong>jsDelivr</strong> (cdn.jsdelivr.net) — used to load the Supabase library that powers the site;</li>
+            <li><strong>OpenStreetMap</strong> (openstreetmap.org) — the embedded map on the Contacts page.</li>
+          </ul>
+          <p>We do not embed advertising networks, social-media tracking widgets (Facebook Pixel, etc.), or retargeting cookies.</p>
+
+          <h2>Retention period</h2>
+          <p>The visit identifier stays in your browser's localStorage until you clear the site's data yourself in your browser settings. Visit statistics stored in our database are only used in aggregated form for the parish's internal use.</p>
+
+          <h2>How to opt out</h2>
+          <p>You can, at any time:</p>
+          <ul>
+            <li>block localStorage and cookies for this site in your browser settings;</li>
+            <li>clear data already stored via your browser settings ("Clear site data");</li>
+            <li>use private/incognito browsing mode.</li>
+          </ul>
+          <p>Blocking localStorage does not affect access to the site's texts, photos, or other information — only the internal visit statistics will stop working correctly.</p>
+
+          <h2>Questions</h2>
+          <p>If you have any questions about how data is used on this site, please get in touch via the <a href="contacts-en.html">Contacts</a> page.</p>
+      </section>
+    </main>
+    <footer class="site-footer"><p>© St Michael the Archangel Church in Cannes</p><p><a href="en.html">Home</a></p></footer>
+  </body>
+</html>
