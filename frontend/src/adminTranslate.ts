@@ -4,6 +4,8 @@ type SupabaseClientLike = any;
 export type TranslationFields = Record<string, string>;
 export type TranslationResult = Partial<Record<LanguageCode, TranslationFields>>;
 
+const DEFAULT_BACKEND_URL = "https://st-michael-church-cannes.onrender.com";
+
 export function translationTargets(sourceLanguage: LanguageCode): LanguageCode[] {
   return (["fr", "en"] as LanguageCode[]).filter((language) => language !== sourceLanguage);
 }
@@ -37,8 +39,9 @@ export async function translateBlock(
   const accessToken = sessionResult?.data?.session?.access_token;
   if (!accessToken) throw new Error("Сессия администратора не найдена. Войдите заново.");
 
-  const backendUrl = window.ST_MICHAEL_BACKEND_URL || "https://st-michael-church-cannes-backend.onrender.com";
-  const response = await fetch(`${backendUrl.replace(/\/$/, "")}/api/translate`, {
+  const backendUrl = (window.ST_MICHAEL_BACKEND_URL || DEFAULT_BACKEND_URL).replace(/\/$/, "");
+  const translateUrl = `${backendUrl}/api/translate`;
+  const response = await fetch(translateUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -51,7 +54,7 @@ export async function translateBlock(
       fields,
     }),
   }).catch((error) => {
-    throw new Error(`Backend недоступен: ${error instanceof Error ? error.message : "network error"}`);
+    throw new Error(`Backend недоступен (${translateUrl}): ${error instanceof Error ? error.message : "network error"}`);
   });
 
   if (!response.ok) {
