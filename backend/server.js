@@ -1,6 +1,7 @@
 const http = require("node:http");
 
 const PORT = Number(process.env.PORT || 10000);
+const RELEASE_ID = "translate-diagnostics-2026-09-22";
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
@@ -23,6 +24,13 @@ const siteInfo = {
   status: "published",
   updatedAt: new Date().toISOString()
 };
+
+const STATUS_PATHS = new Set([
+  "/api/translate/status",
+  "/translate/status",
+  "/api/status",
+  "/status"
+]);
 
 function normalizeOrigin(value) {
   if (!value || value === "*") return value || "";
@@ -234,6 +242,8 @@ function translationStatusPayload() {
   return {
     ok: true,
     service: "st-michael-cannes-backend",
+    releaseId: RELEASE_ID,
+    routes: ["/healthz", "/api/translate", "/api/translate/status", "/status"],
     translation: {
       openaiApiKeyConfigured: Boolean(OPENAI_API_KEY),
       openaiModel: OPENAI_MODEL,
@@ -258,46 +268,62 @@ const server = http.createServer(async (request, response) => {
     }
 
     const url = new URL(request.url, `http://${request.headers.host}`);
+    const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
-    if (request.method === "POST" && url.pathname === "/api/translate") {
+    if (request.method === "POST" && pathname === "/api/translate") {
       await translateBlock(request, response);
       return;
     }
 
     if (request.method !== "GET") {
-      sendJson(request, response, 405, { ok: false, error: "Method not allowed" });
+      sendJson(request, response, 405, { ok: false, error: "Method not allowed", releaseId: RELEASE_ID });
       return;
     }
 
-    if (url.pathname === "/" || url.pathname === "/healthz") {
-      sendJson(request, response, 200, { ok: true, service: "st-michael-cannes-backend" });
+    if (pathname === "/" || pathname === "/healthz") {
+      sendJson(request, response, 200, {
+        ok: true,
+        service: "st-michael-cannes-backend",
+        releaseId: RELEASE_ID
+      });
       return;
     }
 
-    if (url.pathname === "/api/translate/status") {
+    if (STATUS_PATHS.has(pathname)) {
       sendJson(request, response, 200, translationStatusPayload());
       return;
     }
 
-    if (url.pathname === "/api/site") {
-      sendJson(request, response, 200, siteInfo);
+    if (pathname === "/api/site") {
+      sendJson(request, response, 200, { ...siteInfo, releaseId: RELEASE_ID });
       return;
     }
 
-    if (url.pathname === "/api/services") {
+    if (pathname === "/api/services") {
       sendJson(request, response, 200, {
+        releaseId: RELEASE_ID,
         services: [],
         message: "The current service schedule is managed on the website through the CMS."
       });
       return;
     }
 
-    sendJson(request, response, 404, { ok: false, error: "Not found" });
+    sendJson(request, response, 404, {
+      ok: false,
+      error: "Route not found in st-michael-cannes-backend",
+      releaseId: RELEASE_ID,
+      path: pathname,
+      availableRoutes: ["/healthz", "/api/site", "/api/services", "/api/translate/status", "/status", "POST /api/translate"]
+    });
   } catch (error) {
-    sendJson(request, response, 500, { ok: false, error: error.message || "Internal server error" });
+    sendJson(request, response, 500, {
+      ok: false,
+      error: error.message || "Internal server error",
+      releaseId: RELEASE_ID
+    });
   }
 });
 
 server.listen(PORT, () => {
-  console.log(`Backend listening on port ${PORT}`);
+  console.log(`Backend listening on port ${PORT} (${RELEASE_ID})`);
 });
