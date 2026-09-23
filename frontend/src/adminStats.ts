@@ -102,7 +102,7 @@ function sessionKey(visit: PageVisit): string {
   return visit.session_id || visit.visitor_id || visit.id;
 }
 
-function buildSessions(visits: PageVisit[], periodStart: Date): SessionStats[] {
+function buildSessions(visits: PageVisit[], periodStart: Date, periodEnd: Date): SessionStats[] {
   const grouped = new Map<string, PageVisit[]>();
   visits.forEach((visit) => {
     const key = sessionKey(visit);
@@ -119,7 +119,7 @@ function buildSessions(visits: PageVisit[], periodStart: Date): SessionStats[] {
     const firstSeen = explicitFirstSeen || parseDate(firstKnown?.created_at) || new Date();
     const periodVisits = sorted.filter((visit) => {
       const created = parseDate(visit.created_at);
-      return created ? created >= periodStart : false;
+      return created ? created >= periodStart && created < periodEnd : false;
     });
 
     return { sessionId, visits: sorted, firstSeen, periodVisits };
@@ -172,19 +172,45 @@ function renderDailyChart(targetId: string, visits: PageVisit[], days: number): 
   `).join("");
 }
 
+interface PeriodRange {
+  start: Date;
+  end: Date;
+  lookupDays: number;
+  chartDays: number;
+}
+
 export function createAdminStats(options: AdminStatsOptions) {
-  const selectedDays = (): number => {
+  const selectedPeriod = (): PeriodRange => {
     const select = options.$("stats-period-select") as HTMLSelectElement | null;
-    const value = Number(select?.value || 30);
-    return [7, 30, 90, 180].includes(value) ? value : 30;
+    const raw = select?.value || "30";
+    const now = new Date();
+
+    if (raw === "today") {
+      const start = new Date(now);
+      start.setHours(0, 0, 0, 0);
+      return { start, end: now, lookupDays: 180, chartDays: 7 };
+    }
+
+    if (raw === "yesterday") {
+      const end = new Date(now);
+      end.setHours(0, 0, 0, 0);
+      const start = new Date(end);
+      start.setDate(start.getDate() - 1);
+      return { start, end, lookupDays: 180, chartDays: 7 };
+    }
+
+    const value = Number(raw);
+    const days = [7, 30, 90, 180].includes(value) ? value : 30;
+    const start = new Date(now);
+    start.setDate(start.getDate() - days);
+    return { start, end: now, lookupDays: Math.max(days, 180), chartDays: Math.min(days, 30) };
   };
 
   const load = async (): Promise<void> => {
     const client = options.getClient();
     if (!client || !options.getSection().statsManager) return;
 
-    const periodDays = selectedDays();
-    const lookupDays = Math.max(periodDays, 180);
+    const { start: periodStart, end: periodEnd, lookupDays, chartDays } = selectedPeriod();
     const lookupStart = new Date();
     lookupStart.setDate(lookupStart.getDate() - lookupDays);
 
@@ -204,15 +230,13 @@ export function createAdminStats(options: AdminStatsOptions) {
     }
 
     const allVisits = ((data || []) as PageVisit[]).filter((visit) => visit.page_path !== "/admin.html");
-    const periodStart = new Date();
-    periodStart.setDate(periodStart.getDate() - periodDays);
     const periodVisits = allVisits.filter((visit) => {
       const created = parseDate(visit.created_at);
-      return created ? created >= periodStart : false;
+      return created ? created >= periodStart && created < periodEnd : false;
     });
 
     const today = dayKey(new Date());
-    const sessions = buildSessions(allVisits, periodStart).filter((session) => session.periodVisits.length > 0);
+    const sessions = buildSessions(allVisits, periodStart, periodEnd).filter((session) => session.periodVisits.length > 0);
     const uniqueSessions = sessions.length;
     const newSessions = sessions.filter((session) => session.firstSeen >= periodStart).length;
     const returningSessions = Math.max(0, uniqueSessions - newSessions);
@@ -256,7 +280,7 @@ export function createAdminStats(options: AdminStatsOptions) {
     renderRows("stats-languages", languageRows, "Данных по языкам пока нет.");
     renderRows("stats-entry-pages", entryRows, "Входных страниц пока нет.");
     renderRows("stats-recent", recent, "Посещений пока нет.");
-    renderDailyChart("stats-daily", periodVisits, Math.min(periodDays, 30));
+    renderDailyChart("stats-daily", allVisits, chartDays);
     options.setText("editor-status", "Статистика обновлена.");
   };
 
